@@ -8,7 +8,6 @@ class Button : public Component {
 public:
   String text_ = "";
 
-  bool is_focused_ = false;
   e_handler_t click_handler_ = nullptr;
 
   explicit Button(String text, e_handler_t &&click_handler = nullptr) : Component() {
@@ -38,12 +37,6 @@ public:
 
   // Get the button text
   String GetText() const { return this->text_; }
-
-  // Focus the button (draws background)
-  void Focus() { this->is_focused_ = true; }
-
-  // Unfocus the button (draws border)
-  void Unfocus() { this->is_focused_ = false; }
 
   // Trigger the click event
   void Click() const { this->click_handler_(); }

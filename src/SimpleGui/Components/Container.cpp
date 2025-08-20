@@ -44,6 +44,9 @@ namespace SGui {
       this->focused_state_.index++; // move to the next child
 
       if (this->children_[this->focused_state_.index]->type() == CONTROL) {
+        if (this->focused_state_.component != nullptr) {
+          this->focused_state_.component->Unfocus(); // unfocus component before updating
+        }
         this->focused_state_.component = this->children_[this->focused_state_.index]->Focus();
         focused_state_.err_state = SUCCESS;
         goto end;
@@ -52,7 +55,7 @@ namespace SGui {
     this->focused_state_.err_state = OUT_OF_BOUNDS;
     end:
     Serial.println(focused_state_.index);
-    Serial.println(this->children_.size());
+    Serial.printf("%p\n", this->children_[focused_state_.index]);
     return this->focused_state_;
   }
 
@@ -72,8 +75,12 @@ namespace SGui {
       // Is this an input?
       if (this->children_[this->focused_state_.index]->type() == CONTROL) {
         // update the state and return success
-        this->focused_state_.err_state = SUCCESS;
+        this->focused_state_.index = max(this->focused_state_.index, 0);
+        if (this->focused_state_.component != nullptr) {
+          this->focused_state_.component->Unfocus(); // unfocus component before updating
+        }
         this->focused_state_.component = this->children_[this->focused_state_.index]->Focus();
+        this->focused_state_.err_state = SUCCESS;
         goto end;
       }
     }
@@ -104,6 +111,9 @@ namespace SGui {
     if (index >= 0 && index < this->children_.size()) {
       // Is this an input?
       if (this->children_[index]->type() == CONTROL) {
+        if (this->focused_state_.component != nullptr) {
+          this->focused_state_.component->Unfocus(); // unfocus component before updating
+        }
         this->focused_state_.component = this->children_[index]->Focus();
         this->focused_state_.index = index;
         this->focused_state_.err_state = SUCCESS;
@@ -136,6 +146,9 @@ namespace SGui {
     if (child->type() == CONTROL) {
       for (int i = 0; i < this->children_.size(); i++) {
         if (this->children_[i] == child) {
+          if (this->focused_state_.component != nullptr) {
+            this->focused_state_.component->Unfocus(); // unfocus component before updating
+          }
           this->focused_state_.component = child->Focus();
           this->focused_state_.index = i;
           this->focused_state_.err_state = SUCCESS;

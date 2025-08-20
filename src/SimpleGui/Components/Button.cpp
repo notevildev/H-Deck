@@ -63,9 +63,8 @@ namespace SGui {
                   this->size_.y + (this->style_->padding_.top + this->style_->padding_.bottom),
                   this->style_->foreground_);
 
-    // TODO: Focused style isn't working for some reason.
     // Draw the button background
-    if (this->is_focused_) {
+    if (this->focused_) {
       tft.fillRect(this->pos_.x, this->pos_.y,
                     this->size_.x + (this->style_->padding_.left + this->style_->padding_.right),
                     this->size_.y + (this->style_->padding_.top + this->style_->padding_.bottom),
