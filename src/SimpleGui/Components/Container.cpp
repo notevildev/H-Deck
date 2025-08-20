@@ -40,20 +40,22 @@ namespace SGui {
     }
 
     // Iterate children following focused child
-    while (this->focused_state_.index < children_.size() - 1) {
+    while (this->focused_state_.index < this->children_.size() - 1) {
+      this->focused_state_.index++; // move to the next child
+
       if (this->children_[this->focused_state_.index]->type() == CONTROL) {
         this->focused_state_.component = this->children_[this->focused_state_.index]->Focus();
         focused_state_.err_state = SUCCESS;
         goto end;
       }
-
-      this->focused_state_.index++; // move to the next child
     }
     this->focused_state_.err_state = OUT_OF_BOUNDS;
     end:
+    Serial.println(focused_state_.index);
+    Serial.println(this->children_.size());
     return this->focused_state_;
   }
-  // TODO: Fairly certain there's an out-of-bounds read error happening here
+
   // Focus the previous child component
   UIContainerFocusState Container::FocusPrev() {
     // No children?
@@ -65,6 +67,8 @@ namespace SGui {
     }
 
     while (this->focused_state_.index > 0) {
+      this->focused_state_.index--; // move to the previous child
+
       // Is this an input?
       if (this->children_[this->focused_state_.index]->type() == CONTROL) {
         // update the state and return success
@@ -72,17 +76,17 @@ namespace SGui {
         this->focused_state_.component = this->children_[this->focused_state_.index]->Focus();
         goto end;
       }
-
-      this->focused_state_.index--; // move to the previous child
     }
 
     // don't change focus, just return out of bounds
-    this->focused_state_.index = distance(this->children_.begin(),
-      find(this->children_.begin(), this->children_.end(), this->focused_state_.component)
-      ); // blame C++ iterators for this garbage syntax
+    this->focused_state_.index = max(
+          distance(this->children_.begin(), find(this->children_.begin(), this->children_.end(), this->focused_state_.component)) - 1, 0
+        ); // blame C++ iterators for this garbage syntax
     this->focused_state_.err_state = OUT_OF_BOUNDS;
 
     end:
+    Serial.println(focused_state_.index);
+    Serial.println(this->children_.size());
     return this->focused_state_;
   }
 
@@ -113,9 +117,9 @@ namespace SGui {
 
     // don't change focus, just return out of bounds
     this->focused_state_.err_state = OUT_OF_BOUNDS;
-    this->focused_state_.index = distance(this->children_.begin(),
-      find(this->children_.begin(), this->children_.end(), this->focused_state_.component)
-      ); // blame C++ iterators for this garbage syntax
+    this->focused_state_.index = max(
+          distance(this->children_.begin(), find(this->children_.begin(), this->children_.end(), this->focused_state_.component)) - 1, 0
+        ); // blame C++ iterators for this garbage syntax
     return this->focused_state_;
   }
 
@@ -142,6 +146,7 @@ namespace SGui {
       goto end;
     }
     this->focused_state_.err_state = DELINQUENT_CHILD;
+
     end:
     return this->focused_state_;
   }
