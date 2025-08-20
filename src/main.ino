@@ -81,21 +81,13 @@ void setup() {
   gui->bind_input_event(SGui::input_event_t{.type=TRACKBALL, .id=TRACKBALL_LEFT},
     [](GUIManager* self) {
       Serial.println("TRACKBALL LEFT: Focusing previous...");
-      try {
-        self->get_active_window()->FocusPrev();
-      } catch (...) {
-        Serial.println("[!!!] Failed to focus previous");
-      }
+      self->get_active_window()->FocusPrev();
   });
 
   gui->bind_input_event(SGui::input_event_t{.type=TRACKBALL, .id=TRACKBALL_RIGHT},
     [](GUIManager* self) {
       Serial.println("TRACKBALL RIGHT: Focusing next...");
-      try {
-        self->get_active_window()->FocusNext();
-      } catch (...) {
-        Serial.println("[!!!] Failed to focus next");
-      }
+      self->get_active_window()->FocusNext();
   });
 
 }

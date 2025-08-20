@@ -66,6 +66,9 @@ public:
   // Change the focused state of the component
   Component* Focus(bool state = true);
 
+  // Changes the focused state of the component to false
+  Component* Unfocus();
+
   // Modify position to move the component into the bounds of its parent
   Component* MoveIntoParentBounds();
 

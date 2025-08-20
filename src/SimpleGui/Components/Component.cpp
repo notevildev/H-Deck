@@ -12,6 +12,13 @@ namespace SGui {
     return this;
   }
 
+  // Changes the focused state of the component to false
+  // Returns self
+  Component* Component::Unfocus() {
+    this->focused_ = false;
+    return this;
+  }
+
   // Modify position to move the component into the bounds of its parent
   // Returns self
   Component* Component::MoveIntoParentBounds() {
