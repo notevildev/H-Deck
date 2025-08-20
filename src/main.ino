@@ -59,22 +59,43 @@ void setup() {
   Serial.println("Binding input events...");
   gui->bind_input_event(input_event_t{.type=TRACKBALL, .id=TRACKBALL_UP},
     [](GUIManager* self) {
-      self->get_active_window()->FocusPrev();
+      Serial.println("TRACKBALL UP: Focusing previous...");
+      try {
+        self->get_active_window()->FocusPrev();
+      } catch (...) {
+        Serial.println("[!!!] Failed to focus previous");
+      }
   });
 
   gui->bind_input_event(input_event_t{.type=TRACKBALL, .id=TRACKBALL_DOWN},
     [](GUIManager* self) {
-      self->get_active_window()->FocusNext();
+      Serial.println("TRACKBALL DOWN: Focusing next...");
+      try {
+        self->get_active_window()->FocusNext();
+      } catch (...) {
+        Serial.println("[!!!] Failed to focus next");
+      }
+
   });
 
   gui->bind_input_event(SGui::input_event_t{.type=TRACKBALL, .id=TRACKBALL_LEFT},
     [](GUIManager* self) {
-      self->get_active_window()->FocusPrev();
+      Serial.println("TRACKBALL LEFT: Focusing previous...");
+      try {
+        self->get_active_window()->FocusPrev();
+      } catch (...) {
+        Serial.println("[!!!] Failed to focus previous");
+      }
   });
 
   gui->bind_input_event(SGui::input_event_t{.type=TRACKBALL, .id=TRACKBALL_RIGHT},
     [](GUIManager* self) {
-      self->get_active_window()->FocusNext();
+      Serial.println("TRACKBALL RIGHT: Focusing next...");
+      try {
+        self->get_active_window()->FocusNext();
+      } catch (...) {
+        Serial.println("[!!!] Failed to focus next");
+      }
   });
 
 }
@@ -86,10 +107,10 @@ void loop() {
    * 3.) Update UI
    * 4.) Render
    */
-  Serial.println("Handling Inputs...");
+  // Serial.println("Handling Inputs...");
   gui->handle_inputs();
-  Serial.println("Drawing UI...");
+  // Serial.println("Drawing UI...");
   gui->draw();
-  Serial.println("Looping...");
+  // Serial.println("Looping...");
   delay(frame_sleep); // Wait for the next frame (as not to overload the Display or the CPU)
 }

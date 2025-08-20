@@ -31,11 +31,11 @@
 #define SPI_MISO_P      38
 #define SPI_SCK_P       40
 
-#define TRACKBALL_LEFT_P   1
-#define TRACKBALL_UP_P     2
-#define TRACKBALL_DOWN_P   3
-#define TRACKBALL_RIGHT_P  15
-#define TRACKBALL_PRESS_P     0
+#define TRACKBALL_LEFT_P  1
+#define TRACKBALL_RIGHT_P 2
+#define TRACKBALL_UP_P    3
+#define TRACKBALL_DOWN_P  15
+#define TRACKBALL_PRESS_P 0
 
 #define ES7210_MCLK_P   48
 #define ES7210_LRCK_P   21
