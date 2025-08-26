@@ -13,6 +13,44 @@ namespace SGui {
 class Component {
 protected:
   bool absolute_ = false;  // positioning mode
+  bool dirty_ = true;
+
+  // State wrapper class to automatically flag certain variables to trigger dynamic UI updates when changed
+  template <class T>
+  class State {
+  private:
+    T value_;
+    Component* owner_ = nullptr;
+
+  public:
+    State() = default;
+    explicit State(const T& value) : value_(value) {}
+    State(Component* owner, const T& value) : owner_(owner), value_(value) {}
+
+    // General assignment
+    State& operator=(const T& value) {
+      if (value != value_) {
+        this->value_ = value;
+        if (owner_) { owner_->dirty_ = true; }
+        return *this;
+      }
+    }
+
+    // Assignment from another State
+    State& operator=(const State& other) {
+      if (this != &other) {
+        owner_ = other.owner_;
+        *this = other.value_;
+      }
+      return *this;
+    }
+
+    operator T() const { return value_; }
+
+    const T& get() const { return value_; }
+
+    void set(const T& value) { *value_ = value; }
+  };
 
 public:
   UIPoint pos_{0, 0}; // 2D point representing position
