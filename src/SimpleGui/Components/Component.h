@@ -15,6 +15,11 @@ protected:
   bool absolute_ = false;  // positioning mode
   bool dirty_ = true;
 
+  // Function to draw the component to the screen
+  // Should NOT contain logic to re-draw, and is not to be called outside of class.
+  // *This function is only called when the component needs updated
+  virtual void Draw() = 0;
+
   // State wrapper class to automatically flag certain variables to trigger dynamic UI updates when changed
   template <class T>
   class State {
@@ -31,9 +36,9 @@ protected:
     State& operator=(const T& value) {
       if (value != value_) {
         this->value_ = value;
-        if (owner_) { owner_->dirty_ = true; }
-        return *this;
+        if (owner_) { owner_->Invalidate(); }
       }
+      return *this;
     }
 
     // Assignment from another State
@@ -49,7 +54,7 @@ protected:
 
     const T& get() const { return value_; }
 
-    void set(const T& value) { *value_ = value; }
+    void set(const T& value) { *this = value; }
   };
 
 public:
@@ -69,14 +74,27 @@ public:
 
   }
 
-  // Draw the component
-  virtual void Draw() = 0;
+  // Invokes the component to be drawn to the screen if needed
+  // set force to bypass `isDirty()` check.
+  void Render(bool force = false) {
+    if (!(force || this->isDirty())) { return; }
+    this->Draw();
+    this->dirty_ = false;
+  }
 
   // Get the rendered size of the component
   virtual UIRect GetRenderedSize() const { return size_; }
 
-  bool isAbsolute() const { return absolute_; }
+  // Marks a component as "dirty", to trigger a re-draw on the next update cycle.
+  __always_inline void Invalidate() { this->dirty_ = true; }
 
+  // Condition to check if the component is marked to need redrawn
+  __always_inline bool isDirty() const { return this->dirty_ }
+
+  // Condition to check if the component is using absolute positioning
+  __always_inline bool isAbsolute() const { return absolute_; }
+
+  // Function to return a component's type (NORMAL, CONTROL, or CONTAINER)
   virtual component_type_t type() const { return NORMAL; }
 
   // Enable or disable absolute positioning for the component

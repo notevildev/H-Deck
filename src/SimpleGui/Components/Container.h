@@ -56,7 +56,7 @@ public:
   UIContainerFocusState FocusChild(Component* child);
 
   // Draw just the children of the component (not the component itself)
-  void DrawChildren();
+  void RenderChildren();
 
   // Set the padding of the container
   virtual Container* SetPadding(int padding_top, int padding_right, int padding_bottom, int padding_left);

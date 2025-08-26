@@ -165,9 +165,9 @@ namespace SGui {
   }
 
   // Returns a list of pointers to direct children (not recursive)
-  void Container::DrawChildren() {
+  void Container::RenderChildren() {
     for (Component* child : this->children_) {
-      child->Draw();
+      child->Render();
     }
   }
 

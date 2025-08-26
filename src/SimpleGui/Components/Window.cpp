@@ -83,7 +83,7 @@ namespace SGui {
       tft.drawString(title_, this->pos_.x + this->title_padding.left, this->pos_.y + this->title_padding.top);
     }
 
-    DrawChildren();
+    RenderChildren();
   }
 
 }  // namespace SGui
