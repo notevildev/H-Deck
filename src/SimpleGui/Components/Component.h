@@ -36,9 +36,7 @@ protected:
     State& operator=(const T& value) {
       if (value != value_) {
         this->value_ = value;
-        Serial.println("!!! STATE CHANGED");
         if (owner_) {
-          Serial.println("!!! INVALIDATING");
           owner_->Invalidate();
         }
       }
