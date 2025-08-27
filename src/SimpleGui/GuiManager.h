@@ -75,7 +75,7 @@ namespace SGui {
     void clear_input_queue();
 
     // Draws the Gui (active window)
-    void draw() const;
+    void render() const;
 
   };
 

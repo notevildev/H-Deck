@@ -112,11 +112,11 @@ namespace SGui {
     this->input_queue_.clear();
   }
 
-  // Draws the Gui (active window)
-  void GUIManager::draw() const{
-    // TODO: Add logic to only redraw display when necessary.
-    /* disabled screen flush due to obnoxious flickering */
-    // tft.fillScreen(TFT_BLACK); // flush the screen before redrawing
-    active_window_->Draw();
+  // Renders the Gui (active window)
+  void GUIManager::render() const{
+    if (active_window_->isDirty()) {
+      tft.fillScreen(TFT_BLACK);
+    }
+    active_window_->Render();
   }
 }

@@ -30,53 +30,26 @@ namespace SGui {
 
   // Focus the next child component
   UIContainerFocusState Container::FocusNext() {
+
+    int i = this->focused_state_.index;
+
     // No children?
     if (this->children_.empty()) {
       // Trigger error state
       this->focused_state_.index = -1;
       this->focused_state_.component = nullptr;
       this->focused_state_.err_state = NO_CHILDREN;
-      return this->focused_state_;
-    }
-
-    // Iterate children following focused child
-    while (this->focused_state_.index < this->children_.size() - 1) {
-      this->focused_state_.index++; // move to the next child
-
-      if (this->children_[this->focused_state_.index]->type() == CONTROL) {
-        if (this->focused_state_.component != nullptr) {
-          this->focused_state_.component->Unfocus(); // unfocus component before updating
-        }
-        this->focused_state_.component = this->children_[this->focused_state_.index]->Focus();
-        focused_state_.err_state = SUCCESS;
-        goto end;
-      }
-    }
-    this->focused_state_.err_state = OUT_OF_BOUNDS;
-    end:
-    Serial.println(focused_state_.index);
-    Serial.printf("%p\n", this->children_[focused_state_.index]);
-    return this->focused_state_;
-  }
-
-  // Focus the previous child component
-  UIContainerFocusState Container::FocusPrev() {
-    // No children?
-    if (this->children_.empty()) {
-      this->focused_state_.err_state = NO_CHILDREN;
-      this->focused_state_.component = nullptr;
-      this->focused_state_.index = -1;
       goto end;
     }
 
-    while (this->focused_state_.index > 0) {
-      this->focused_state_.index--; // move to the previous child
+    while (i < (int)this->children_.size() - 1) {
+      i++; // move to the next child
 
       // Is this an input?
-      if (this->children_[this->focused_state_.index]->type() == CONTROL) {
-        // update the state and return success
-        this->focused_state_.index = max(this->focused_state_.index, 0);
-        if (this->focused_state_.component != nullptr) {
+      if (this->children_[i]->type() == CONTROL) {
+        // Update the state and return success
+        this->focused_state_.index = i;
+        if (this->focused_state_.component) {
           this->focused_state_.component->Unfocus(); // unfocus component before updating
         }
         this->focused_state_.component = this->children_[this->focused_state_.index]->Focus();
@@ -86,16 +59,64 @@ namespace SGui {
     }
 
     // don't change focus, just return out of bounds
-    this->focused_state_.index = max(
-          distance(this->children_.begin(), find(this->children_.begin(), this->children_.end(), this->focused_state_.component)) - 1, 0
-        ); // blame C++ iterators for this garbage syntax
+    // (reached when we're already selecting the last control)
     this->focused_state_.err_state = OUT_OF_BOUNDS;
 
     end:
-    Serial.println(focused_state_.index);
-    Serial.println(this->children_.size());
+    #ifdef DEBUG
+    Serial.printf("Focused Index: %d\n", focused_state_.index);
+    Serial.printf("Error: %d\n", this->focused_state_.err_state);
+    Serial.printf("Pointer: %p\n", this->children_[focused_state_.index]);
+    #endif
+
     return this->focused_state_;
   }
+
+
+  // Focus the previous child component
+  UIContainerFocusState Container::FocusPrev() {
+
+    int i = this->focused_state_.index;
+
+    // No children?
+    if (this->children_.empty()) {
+      // Trigger error state
+      this->focused_state_.index = -1;
+      this->focused_state_.component = nullptr;
+      this->focused_state_.err_state = NO_CHILDREN;
+      goto end;
+    }
+
+    while (i > 0) {
+      i--; // move to the previous child
+
+      // Is this an input?
+      if (this->children_[i]->type() == CONTROL) {
+        // update the state and return success
+        this->focused_state_.index = max(i, 0); // prevent from sub-zero index
+        if (this->focused_state_.component) {
+          this->focused_state_.component->Unfocus(); // unfocus component before updating
+        }
+        this->focused_state_.component = this->children_[this->focused_state_.index]->Focus();
+        this->focused_state_.err_state = SUCCESS;
+        goto end;
+      }
+    }
+
+    // don't change focus, just return out of bounds
+    // (reached when we're already selecting the last control)
+    this->focused_state_.err_state = OUT_OF_BOUNDS;
+
+    end:
+    #ifdef DEBUG
+    Serial.printf("Focused Index: %d\n", focused_state_.index);
+    Serial.printf("Error: %d\n", this->focused_state_.err_state);
+    Serial.printf("Pointer: %p\n", this->children_[focused_state_.index]);
+    #endif
+
+    return this->focused_state_;
+  }
+
 
   // Focus the specified child component
   UIContainerFocusState Container::FocusChild(int index) {
@@ -133,6 +154,7 @@ namespace SGui {
     return this->focused_state_;
   }
 
+
   // Focus the specified child component
   UIContainerFocusState Container::FocusChild(Component* child) {
     // No children?
@@ -164,12 +186,14 @@ namespace SGui {
     return this->focused_state_;
   }
 
+
   // Returns a list of pointers to direct children (not recursive)
-  void Container::DrawChildren() {
+  void Container::RenderChildren(bool force) {
     for (Component* child : this->children_) {
-      child->Draw();
+      child->Render(force);
     }
   }
+
 
   // Set the padding of the container
   Container* Container::SetPadding(int padding_top, int padding_right, int padding_bottom, int padding_left) {
