@@ -6,12 +6,13 @@
 namespace SGui {
 class Button : public Component {
 public:
-  String text_ = "";
+  State<String> text_;
 
   e_handler_t click_handler_ = nullptr;
 
   explicit Button(String text, e_handler_t &&click_handler = nullptr) : Component() {
-    this->text_ = text;
+    this->text_ = State<String>(this, text);
+
     this->style_->padding_ = {2, 2, 2, 2};
     this->click_handler_ = std::move(click_handler);
     this->size_.x = tft.textWidth(text);
@@ -21,7 +22,7 @@ public:
   component_type_t type() const override { return CONTROL; };
 
   // Set the text of the button
-  Button* SetText(String text);
+  Button* SetText(const String& text);
 
   // Set the text size of the button
   // Default: 1

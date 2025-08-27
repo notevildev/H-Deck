@@ -9,7 +9,7 @@
 namespace SGui {
 
   // Set the text of the button
-  Button* Button::SetText(String text) {
+  Button* Button::SetText(const String& text) {
     this->text_ = text;
 
     // Update the size of the button
@@ -22,7 +22,6 @@ namespace SGui {
   // Default: 1
   Button* Button::SetTextSize(uint8_t text_size) {
     this->style_->SetTextSize(text_size);
-
     // Update the size of the button
     this->size_.x = tft.textWidth(this->text_) * this->style_->text_size_;
     this->size_.y = tft.fontHeight() * this->style_->text_size_;
