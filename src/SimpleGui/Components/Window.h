@@ -57,5 +57,9 @@ namespace SGui {
 
     // Draw the window and its children
     void Draw() override;
+
+    // Invokes the component to be drawn to the screen if needed
+    // set force to bypass `isDirty()` check.
+    void Render(bool force = false) override;
   };
 }  // namespace SGui

@@ -63,8 +63,22 @@ namespace SGui {
     }
     return this;
   }
+
+  // Invokes the component to be drawn to the screen if needed
+  // set force to bypass `isDirty()` check.
+  void Window::Render(bool force) {
+    if (force || this->isDirty()) {
+      this->Draw();
+      RenderChildren(this->isDirty());
+      this->dirty_ = false;
+      return;
+    }
+    RenderChildren(this->isDirty());
+  }
+
   // Draw the window and its children
   void Window::Draw() {
+
     // If the window is inside a container, adjust its position accordingly.
     if (this->parent_ != nullptr) {
       this->MoveIntoParentBounds();
@@ -82,8 +96,6 @@ namespace SGui {
                    this->style_->border_color_);  // Title bar separator
       tft.drawString(title_, this->pos_.x + this->title_padding.left, this->pos_.y + this->title_padding.top);
     }
-
-    RenderChildren();
   }
 
 }  // namespace SGui

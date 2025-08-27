@@ -114,9 +114,9 @@ namespace SGui {
 
   // Renders the Gui (active window)
   void GUIManager::render() const{
-    // TODO: Add logic to only redraw display when necessary.
-    /* disabled screen flush due to obnoxious flickering */
-    // tft.fillScreen(TFT_BLACK); // flush the screen before redrawing
+    if (active_window_->isDirty()) {
+      tft.fillScreen(TFT_BLACK);
+    }
     active_window_->Render();
   }
 }

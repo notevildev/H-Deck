@@ -102,7 +102,7 @@ void loop() {
   // Serial.println("Handling Inputs...");
   gui->handle_inputs();
   // Serial.println("Drawing UI...");
-  gui->draw();
+  gui->render();
   // Serial.println("Looping...");
   delay(frame_sleep); // Wait for the next frame (as not to overload the Display or the CPU)
 }

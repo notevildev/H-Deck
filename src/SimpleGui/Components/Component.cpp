@@ -5,6 +5,15 @@
 
 namespace SGui {
 
+  // Invokes the component to be drawn to the screen if needed
+  // set force to bypass `isDirty()` check.
+  void Component::Render(bool force)  {
+    if (force || this->isDirty()) {
+      this->Draw();
+      this->dirty_ = false;
+    }
+  }
+
   // Change the focused state of the component
   // Returns self
   Component* Component::Focus(bool state) {

@@ -36,7 +36,11 @@ protected:
     State& operator=(const T& value) {
       if (value != value_) {
         this->value_ = value;
-        if (owner_) { owner_->Invalidate(); }
+        Serial.println("!!! STATE CHANGED");
+        if (owner_) {
+          Serial.println("!!! INVALIDATING");
+          owner_->Invalidate();
+        }
       }
       return *this;
     }
@@ -64,23 +68,24 @@ public:
   UIStyle* style_ = new UIStyle(*DEFAULT_STYLE);
   UIStyle* focused_style_ = new UIStyle(*DEFAULT_STYLE_FOCUSED);
 
-  bool focused_ = false; // focused state
+  State<bool> focused_; // focused state
   Component* parent_ = nullptr;
 
-  Component() = default; // default constructor
+  // Default constructor
+  Component() { this->focused_ = State<bool>(this, false); } // default constructor// default constructor
   explicit Component(UIPoint position, UIRect dimensions, UIStyle* style, UIStyle* focused_style = DEFAULT_STYLE_FOCUSED,
                        Component* parent = nullptr)
       : pos_(position), size_(dimensions), style_(style), focused_style_(focused_style), parent_(parent) {
 
+    this->focused_ = State<bool>(this, false);
   }
 
-  // Invokes the component to be drawn to the screen if needed
+  Component(const Component&) = delete;
+  Component& operator=(const Component&) = delete;
+
+  // Requests the component to be drawn to the screen if needed
   // set force to bypass `isDirty()` check.
-  void Render(bool force = false) {
-    if (!(force || this->isDirty())) { return; }
-    this->Draw();
-    this->dirty_ = false;
-  }
+  virtual void Render(bool force = false);
 
   // Get the rendered size of the component
   virtual UIRect GetRenderedSize() const { return size_; }
@@ -89,7 +94,7 @@ public:
   __always_inline void Invalidate() { this->dirty_ = true; }
 
   // Condition to check if the component is marked to need redrawn
-  __always_inline bool isDirty() const { return this->dirty_ }
+  __always_inline bool isDirty() const { return this->dirty_; }
 
   // Condition to check if the component is using absolute positioning
   __always_inline bool isAbsolute() const { return absolute_; }

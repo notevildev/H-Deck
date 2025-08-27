@@ -57,21 +57,24 @@ namespace SGui {
 
   // Draw the button
   void Button::Draw() {
+    UIStyle* style = this->style_;
+
+    if (this->focused_) { style = this->focused_style_; }
+
+    // Clear the button background
+    tft.fillRect(this->pos_.x, this->pos_.y,
+                  this->size_.x + (this->style_->padding_.left + this->style_->padding_.right),
+                  this->size_.y + (this->style_->padding_.top + this->style_->padding_.bottom),
+                  style->background_);
+
     // Draw the button border
     tft.drawRect(this->pos_.x, this->pos_.y,
                   this->size_.x + (this->style_->padding_.left + this->style_->padding_.right),
                   this->size_.y + (this->style_->padding_.top + this->style_->padding_.bottom),
                   this->style_->foreground_);
 
-    // Draw the button background
-    if (this->focused_) {
-      tft.fillRect(this->pos_.x, this->pos_.y,
-                    this->size_.x + (this->style_->padding_.left + this->style_->padding_.right),
-                    this->size_.y + (this->style_->padding_.top + this->style_->padding_.bottom),
-                    this->focused_style_->background_);
-    }
     // Draw the button text
-    tft.setTextColor(this->style_->foreground_);
+    tft.setTextColor(style->foreground_);
     tft.setTextSize(this->style_->text_size_);
     tft.drawString(this->text_, this->pos_.x + this->style_->padding_.left, this->pos_.y + this->style_->padding_.bottom);
   }
