@@ -21,7 +21,7 @@ namespace SGui{
     // Returns a high contrast version of this style (NOT A POINTER)
     // inverts background and foreground
     // [used for focused components]
-    UIStyle HighContrast() const {
+    __always_inline UIStyle HighContrast() const {
       return {
         this->background_,
         this->foreground_,
@@ -35,38 +35,38 @@ namespace SGui{
     }
 
     // Set the style's foreground color
-    UIStyle* SetForeground(UIColor& color) {
+    __always_inline UIStyle* SetForeground(UIColor& color) {
       this->foreground_ = color;
       return this;
     }
 
     // Set the style's background color
-    UIStyle* SetBackground(UIColor& color) {
+    __always_inline UIStyle* SetBackground(UIColor& color) {
       this->background_ = color;
       return this;
     }
 
     // Set the style's border color
-    UIStyle* SetBorderColor(UIColor& color) {
+    __always_inline UIStyle* SetBorderColor(UIColor& color) {
       this->border_color_ = color;
       return this;
     }
 
     // Set the style's border thickness
-    UIStyle* SetBorderThickness(uint8_t thickness) {
+    __always_inline UIStyle* SetBorderThickness(uint8_t thickness) {
       this->border_thickness_ = thickness;
       return this;
     }
 
     // Set the style's text size multiplier
     // Default: 1
-    UIStyle* SetTextSize(uint8_t text_size) {
+    __always_inline UIStyle* SetTextSize(uint8_t text_size) {
       this->text_size_ = text_size;
       return this;
     }
 
     // Set the style's padding
-    UIStyle* SetPadding(UIBoxSpacing padding) {
+    __always_inline UIStyle* SetPadding(UIBoxSpacing padding) {
       this->padding_ = padding;
       return this;
     }

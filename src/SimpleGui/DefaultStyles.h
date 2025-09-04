@@ -3,6 +3,9 @@
 #include "UIStyle.h"
 
 namespace SGui{
+/* TODO:
+ * Figure out how to prevent accidental overriding from other components
+*/
   static UIStyle* DEFAULT_STYLE = new UIStyle(
     (UIColor)WHITE, // foreground
     (UIColor)BLACK, // background

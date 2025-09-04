@@ -5,13 +5,14 @@
 
 namespace SGui {
 class Button : public Component {
-public:
-  State<String> text_;
-
+private:
+  Observable<String> text_;
   e_handler_t click_handler_ = nullptr;
 
+public:
+
   explicit Button(String text, e_handler_t &&click_handler = nullptr) : Component() {
-    this->text_ = State<String>(this, text);
+    this->text_ = Observable<String>(this, text);
 
     this->style_->padding_ = {2, 2, 2, 2};
     this->click_handler_ = std::move(click_handler);
@@ -30,11 +31,6 @@ public:
 
   // Set the click handler of the button
   Button* SetClickHandler(e_handler_t &&handler);
-
-  // Set the button padding
-  Button* SetPadding(int x, int y);
-  Button* SetPadding(int top, int left, int bottom, int right);
-  Button* SetPadding(UIBoxSpacing padding);
 
   // Get the button text
   String GetText() const { return this->text_; }

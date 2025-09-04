@@ -34,26 +34,6 @@ namespace SGui {
       return this;
   }
 
-  // Set the button padding
-  Button* Button::SetPadding(int x, int y) {
-      this->style_->padding_.top = y;
-      this->style_->padding_.left = x;
-      this->style_->padding_.bottom = y;
-      this->style_->padding_.right = x;
-      return this;
-  }
-  Button* Button::SetPadding(int top, int left, int bottom, int right) {
-      this->style_->padding_.top = top;
-      this->style_->padding_.left = left;
-      this->style_->padding_.bottom = bottom;
-      this->style_->padding_.right = right;
-      return this;
-  }
-  Button* Button::SetPadding(UIBoxSpacing padding) {
-      this->style_->padding_ = padding;
-      return this;
-  }
-
   // Draw the button
   void Button::Draw() {
     UIStyle* style = this->style_;
