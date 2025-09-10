@@ -7,6 +7,7 @@
 #include "pins.h"
 
 #include "components.h"
+#include "Keyboard.h"
 
 namespace SGui {
   // Vector of Window pointers
@@ -17,6 +18,9 @@ namespace SGui {
   private:
     std::pair<Component*, UIPoint> focused_ = {nullptr, { 0, 0 }};
     Window* active_window_ = nullptr;
+
+    Keyboard* keyboard_ = nullptr;
+
 
     viewport_t viewport_ = {};
 

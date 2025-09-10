@@ -33,6 +33,9 @@ namespace SGui {
     attachInterrupt(TRACKBALL_PRESS_P, [] {
       self_->create_input_event(input_event_t{.type=TRACKBALL, .id=TRACKBALL_PRESS});
     }, RISING);
+
+    // initialize the keyboard
+    self_->keyboard_->Init();
   }
 
   // Handles a single input_event_t from the input_queue
@@ -54,6 +57,8 @@ namespace SGui {
 
   // Handles ALL inputs currently queued in the input_queue
   handler_exception_t GUIManager::handle_inputs() {
+    self_->keyboard_->readKey();
+
     while (!input_queue_.empty()) {
       handler_exception_t status = handle(input_queue_[0]);
 
