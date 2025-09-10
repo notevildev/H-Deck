@@ -23,12 +23,11 @@ namespace SGui {
       this->value_changed_handler_ = std::move(value_changed_handler);
 
       this->style_->padding_ = {2, 2, 2, 2};
-      this->value_changed_handler_ = std::move(value_changed_handler);
 
       // if parent exists, set width to parent's width
       if (this->parent_) {
         this->size_.x = this->parent_->size_.x;
-      } else {this->size_.x = }
+      } else { this->size_.x = charWidth * 8; }
 
       this->size_.y = tft.fontHeight();
     }
