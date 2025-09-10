@@ -30,12 +30,12 @@ Base component class. All UI components should inherit from this class, as it in
 > *This value is automatically updated when calling `Container.AddChild()`
 
 #### `UIStyle* style_`
-> Points to the component's standard [UIStyle](https://github.com/rondotdll/H-Deck)
+> Points to the component's standard [UIStyle](https://github.com/rondotdll/H-Deck/blob/dev/src/SimpleGui/Documentation/UIStyle.md)
 > 
 > Points to `DEFAULT_STYLE` by default.
 
 #### `UIStyle* focused_style_`
-> Points to the component's focused [UIStyle](https://github.com/rondotdll/H-Deck), which is subbed in depending on the value of `Component.focused_`
+> Points to the component's focused [UIStyle](https://github.com/rondotdll/H-Deck/blob/dev/src/SimpleGui/Documentation/UIStyle.md), which is subbed in depending on the value of `Component.focused_`
 > 
 > Points to `DEFAULT_STYLE_FOCUSED` by default.
 
@@ -102,7 +102,7 @@ explicit Component(
 > Returns the **logical center point** of the component
 
 #### `virtual std::vector<Component*> Children()`
-> Empty function to satisfy compiler, see [Container](https://github.com/rondotdll/H-Deck)
+> Empty function to satisfy compiler, see [Container](https://github.com/rondotdll/H-Deck/blob/dev/src/SimpleGui/Documentation/Container.md)
 
 #### `Component* Focus(bool state = true)`
 > Sets `Component.focused_` to `state`

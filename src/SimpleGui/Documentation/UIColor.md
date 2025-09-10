@@ -33,3 +33,10 @@ UIColor yellow =   UIColor(
 
 
 ## #Callable
+#### `UIColor GetContrast()`
+> Returns black or white, based on a rough approximation to determine which contrasts better with itself.
+> *Not a pointer
+
+#### `UIColor Invert() const`
+> Returns the color that is inverse to itself
+> *Not a pointer
