@@ -28,17 +28,17 @@ For added convenience, there is a static `DEFAULT_STYLE` definition in `DefaultS
 Initialization is fairly self-explanatory, all properties are directly initialized in the same order they are defined,
 ```c++
 UIStyle myStyle = UIStyle(
-	(UIColor)foreground, // no pointers! intended to use inline initialization
-	(UIColor)background, 
-	(UIColor)border_color, 
-	(uint8_t)border_thickness, 
-	(uint8_t)text_size, 
-	(UIBoxSpacing)padding
+	     (UIColor) foreground, // no pointers, use inline initialization!
+	     (UIColor) background, 
+	     (UIColor) border_color, 
+	     (uint8_t) border_thickness, 
+	     (uint8_t) text_size, 
+	(UIBoxSpacing) padding
 )
 ```
 
 
-## #Callable Functions
+## #Callable
 
 #### `UIStyle HighContrast() const`
 > Returns a new instance of `UIStyle` with the background and foreground colors inverted.

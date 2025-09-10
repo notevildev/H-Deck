@@ -63,11 +63,11 @@ public:
   UIPoint pos_{0, 0}; // 2D point representing position
   UIRect size_{0, 0}; // 2D point representing size
 
-  UIStyle* style_ = new UIStyle(*DEFAULT_STYLE);
-  UIStyle* focused_style_ = new UIStyle(*DEFAULT_STYLE_FOCUSED);
-
   Observable<bool> focused_; // focused state
   Component* parent_ = nullptr;
+
+  UIStyle* style_ = new UIStyle(*DEFAULT_STYLE);
+  UIStyle* focused_style_ = new UIStyle(*DEFAULT_STYLE_FOCUSED);
 
   // Default constructor
   Component() { this->focused_ = Observable<bool>(this, false); } // default constructor// default constructor
