@@ -12,10 +12,15 @@ namespace SGui {
 
 #define KEYBOARD_I2C_ADDR 0x55
 
+#define BACKSPACE 0x08
+#define ENTER 0x0D
+#define SPACE 0x20
+#define UPPER_DOLLARSIGN 0x04
+
   class Keyboard {
   protected:
     bool initialized_;
-    uint16_t keyboard_i2c_address_;
+    int keyboard_i2c_address_;
 
   public:
     /*

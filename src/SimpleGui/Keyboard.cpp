@@ -16,7 +16,7 @@ namespace SGui {
     * Brightness Range: 30 ~ 255
     * */
   void Keyboard::setBacklightBrightness(uint8_t value, bool persist) {
-    Wire.beginTransmission(KEYBOARD_I2C_ADDR);
+    Wire.beginTransmission(this->keyboard_i2c_address_);
     Wire.write(persist ? 0x02 : 0x01); // 0x02 sets the default brightness
     Wire.write(value);
     Wire.endTransmission();
@@ -24,7 +24,7 @@ namespace SGui {
 
 // Initialize the keyboard (must be called before use)
   void Keyboard::Init() {
-    if (initialized_) return;
+    if (this->initialized_) return;
     bool ready = false;
 
     // Verify peripheral power is enabled
@@ -39,7 +39,7 @@ namespace SGui {
 
     // Verify the keyboard initializes properly
     while (!ready) {
-      Wire.requestFrom((int)this->keyboard_i2c_address_, 1);
+      Wire.requestFrom(this->keyboard_i2c_address_, 1);
       if (Wire.read() == -1) {
         Serial.println("Waiting for keyboard...");
         delay(500);
@@ -56,13 +56,13 @@ namespace SGui {
   // Read a single keypress from the T-Deck
   char Keyboard::readKey() {
     char keyValue = 0;
-    Wire.requestFrom(KEYBOARD_I2C_ADDR, 1);
+    Wire.requestFrom(this->keyboard_i2c_address_, 1);
 
     while (Wire.available() > 0) {
       keyValue = Wire.read();
       if (keyValue != (char)0x00) {
         Serial.print("keyValue : ");
-        Serial.println(keyValue);
+        Serial.printf("%c (%d)\n", keyValue, (int)keyValue);
       }
     }
     return keyValue;

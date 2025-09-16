@@ -86,6 +86,7 @@ void loop() {
    * 3.) Update UI
    * 4.) Render
    */
+
   // Serial.println("Handling Inputs...");
   gui->handle_inputs();
   // Serial.println("Drawing UI...");

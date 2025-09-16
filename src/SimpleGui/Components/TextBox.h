@@ -45,6 +45,12 @@ namespace SGui {
     // Set the placeholder text of the TextBox
     TextBox* SetPlaceholder(String placeholder);
 
+    UIRect GetRenderedSize() const override {
+      return {
+        (uint16_t)(this->size_.x + this->style_->padding_.left + this->style_->padding_.right),
+        (uint16_t)(this->size_.y + this->style_->padding_.top + this->style_->padding_.bottom)
+      };
+    }
 
     void Draw() override;
   };

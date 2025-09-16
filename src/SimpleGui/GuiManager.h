@@ -19,8 +19,7 @@ namespace SGui {
     std::pair<Component*, UIPoint> focused_ = {nullptr, { 0, 0 }};
     Window* active_window_ = nullptr;
 
-    Keyboard* keyboard_ = nullptr;
-
+    Keyboard keyboard_ = Keyboard();
 
     viewport_t viewport_ = {};
 
