@@ -2,8 +2,23 @@
 
 #include <vector>
 #include <algorithm>
+#include <Arduino.h>
 
+#include "GuiManager.h"
 #include "types.h"
+
+
+namespace Keyboard {
+
+#define BACKSPACE 0x08
+#define ENTER 0x0D
+#define SPACE 0x20
+#define UPPER_DOLLARSIGN 0x04
+
+  char readKey();
+
+}
+
 
 namespace SGui {
 

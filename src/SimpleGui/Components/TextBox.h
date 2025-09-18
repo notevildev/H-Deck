@@ -3,14 +3,15 @@
 // Created by David J on 9/4/25.
 //
 
-#include "Component.h"
+#include "InputComponent.h"
 #include "../helper.h" // (already includes types.h)
 
 
 namespace SGui {
-  class TextBox : public Component {
+  class TextBox : public InputComponent {
   private:
     Observable<String> value_;
+    String placeholder_ = "";
     e_handler_t value_changed_handler_ = nullptr;
 
   public:
@@ -31,8 +32,6 @@ namespace SGui {
 
       this->size_.y = tft.fontHeight();
     }
-
-    component_type_t type() const override { return CONTROL; };
 
     String value() const { return this->value_; };
 

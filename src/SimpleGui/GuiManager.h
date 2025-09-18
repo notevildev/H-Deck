@@ -7,7 +7,9 @@
 #include "pins.h"
 
 #include "components.h"
-#include "Keyboard.h"
+
+#define KEYBOARD_I2C_ADDR 0x55
+#define INPUT_EVENT_BUFFER_SIZE 32
 
 namespace SGui {
   // Vector of Window pointers
@@ -19,28 +21,54 @@ namespace SGui {
     std::pair<Component*, UIPoint> focused_ = {nullptr, { 0, 0 }};
     Window* active_window_ = nullptr;
 
-    Keyboard keyboard_ = Keyboard();
 
+    // Current viewport (vector of pointers to each added window)
     viewport_t viewport_ = {};
 
-    std::vector<input_event_t> input_queue_ = {};
+    // Input queue (managed buffer to prevent overflow)
+    managed_buffer<input_event_t, INPUT_EVENT_BUFFER_SIZE> input_queue_ = {};
     std::map<uint16_t, void(*)(GUIManager*)> input_handlers_;
 
     static GUIManager* self_;
+    static bool keyboard_ready_;
+    static bool trackball_ready_;
+    static void* keyboard_task_;
 
   public:
 
     GUIManager() {
+      if (self_) { return; }
+
+      keyboard_task_ = nullptr;
+      trackball_ready_ = false;
+      keyboard_ready_ = false;
       self_ = this;
     };
 
     // Destructor to clear the instance on deletion
     ~GUIManager() {
-      self_ = nullptr;
+      keyboard_task_ = nullptr;
+      if (self_ == this) { // safety check, should never fail
+        self_ = nullptr;
+      }
     }
 
-    // Initialize the Gui (this MUST be called before use, or inputs will not function)
-    static void enable_inputs();
+    // Initialize the keyboard (this MUST be called before use, or keyboard input will not work)
+    void initialize_keyboard() const;
+
+    // Enables keyboard input handling (this MUST be called after initialize_keyboard())
+    void enable_keyboard_input() const;
+
+    void initialize_trackball() const;
+
+    // Initialize the trackball (this MUST be called before use, or trackball navigation will not work)
+    void enable_trackball_input();
+
+    /*
+    * Dynamically modify the keyboard backlight brightness at runtime
+    * Brightness Range: 0 ~ 255
+    * */
+    void setKeyboardBacklight(uint8_t brightness, bool persist = false) const;
 
     // Handles a single input_event_t from the input_queue
     handler_exception_t handle(input_event_t input);
@@ -54,7 +82,7 @@ namespace SGui {
     // Returns the current viewport (vector of pointers to each added window)
     viewport_t get_viewport() const {return this->viewport_;}
     // Returns pointer to the current input queue
-    const std::vector<input_event_t>* get_input_queue() const {return &this->input_queue_;}
+    const managed_buffer<input_event_t, INPUT_EVENT_BUFFER_SIZE>* get_input_queue() const {return &this->input_queue_;}
 
     // Adds a window to the viewportf
     void add_window(Window* window);

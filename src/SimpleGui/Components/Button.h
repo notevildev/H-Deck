@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Component.h"
+#include "InputComponent.h"
 #include "../types.h"
 
 namespace SGui {
-class Button : public Component {
+class Button : public InputComponent {
 private:
   Observable<String> text_;
   e_handler_t click_handler_ = nullptr;
@@ -19,8 +19,6 @@ public:
     this->size_.x = tft.textWidth(text);
     this->size_.y = tft.fontHeight();
   }
-
-  component_type_t type() const override { return CONTROL; };
 
   // Set the text of the button
   Button* SetText(const String& text);

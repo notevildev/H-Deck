@@ -1,17 +1,75 @@
 // File: GuiManager.cpp
 
 #include "GuiManager.h"
+#include "types.h"
+
+#include <Wire.h>
+#include <FreeRTOS.h>
 
 #include <vector>
 #include <unordered_map>
 
-#include "types.h"
 
 namespace SGui {
 
   GUIManager* GUIManager::self_ = nullptr; // <- satisfy the linker
 
-  void GUIManager::enable_inputs() {
+  void GUIManager::initialize_keyboard() const {
+    if (keyboard_ready_) return;
+    bool ready = false;
+
+    // Verify peripheral power is enabled
+    pinMode(POWER_ON_P, OUTPUT);
+    digitalWrite(POWER_ON_P, HIGH);
+
+    // Pause to let keyboard "boot"
+    delay(500);
+
+    // Verify I2C is initialized
+    Wire.begin(I2C_SDA_P, I2C_SCL_P);
+
+    // Verify the keyboard initializes properly
+    while (!ready) {
+      Wire.requestFrom(KEYBOARD_I2C_ADDR, 1);
+      if (Wire.read() == -1) {
+        Serial.println("Waiting for keyboard...");
+        delay(500);
+        continue;
+      }
+      ready = true;
+    }
+    // Set the default backlight brightness level.
+    setKeyboardBacklight(127, true);
+
+    keyboard_ready_ = true;
+  }
+
+  void GUIManager::enable_keyboard_input() const {
+    // verify the keyboard is ready to use
+    initialize_keyboard();
+
+    xTaskCreatePinnedToCore(
+      [](void* arg) {
+        GUIManager* gui = (GUIManager*)arg;
+        for (;;) {
+          char key;
+          while ((key = Keyboard::readKey()) != 0) {
+            gui->create_input_event(input_event_t{.type=KEYBOARD, .id=(uint16_t)key});
+          }
+          vTaskDelay(pdMS_TO_TICKS(10)); // sleep for 10ms
+        }
+      },
+      "keyboard_reader",
+      2048,
+      self_,
+      1,
+      &keyboard_task_,
+      APP_CPU_NUM
+    );
+
+  }
+
+  void GUIManager::enable_trackball_input() {
     // Verify pins are set up for input
     pinMode(TRACKBALL_UP_P, INPUT_PULLUP);
     pinMode(TRACKBALL_DOWN_P, INPUT_PULLUP);
@@ -33,9 +91,23 @@ namespace SGui {
     attachInterrupt(TRACKBALL_PRESS_P, [] {
       self_->create_input_event(input_event_t{.type=TRACKBALL, .id=TRACKBALL_PRESS});
     }, RISING);
+  }
 
-    // initialize the keyboard
-    self_->keyboard_.Init();
+  /* Dynamically modify backlight brightness at runtime
+      *
+      * Setting persist to true will set the default backlight brightness level. If
+      * the user sets the backlight to 0 via setKeyboardBrightness, the default
+      * brightness is used when pressing ALT+B, rather than the backlight brightness
+      * level set by the user. This ensures that pressing ALT+B can respond to the
+      * backlight being turned on and off normally.
+      *
+      * Brightness Range: 30 ~ 255
+      * */
+  void GUIManager::setKeyboardBacklight(uint8_t brightness, bool persist) const {
+    Wire.beginTransmission(KEYBOARD_I2C_ADDR);
+    Wire.write(persist ? 0x02 : 0x01); // 0x02 sets the default brightness
+    Wire.write(brightness);
+    Wire.endTransmission();
   }
 
   // Handles a single input_event_t from the input_queue
@@ -57,8 +129,6 @@ namespace SGui {
 
   // Handles ALL inputs currently queued in the input_queue
   handler_exception_t GUIManager::handle_inputs() {
-    self_->keyboard_.readKey();
-
     while (!input_queue_.empty()) {
       handler_exception_t status = handle(input_queue_[0]);
 
@@ -67,7 +137,7 @@ namespace SGui {
         return status;
       }
 
-      input_queue_.erase(input_queue_.begin());
+      input_queue_.pop_first();
     }
     return OK;
   }
@@ -109,7 +179,7 @@ namespace SGui {
   // Adds an input event to the input queue
   // input: The input event to add
   void GUIManager::create_input_event(input_event_t input) {
-    this->input_queue_.push_back(input);
+    this->input_queue_.push(input);
   }
 
   // Clears the input queue

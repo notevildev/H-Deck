@@ -34,7 +34,7 @@ void setup() {
   Serial.println("Initializing TFT...");
   gui = Init();
   Serial.println("Enabling inputs...");
-  gui->enable_inputs();
+  gui->enable_trackball_input();
 
   Serial.println("Creating window...");
 
