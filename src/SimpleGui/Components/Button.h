@@ -11,7 +11,7 @@ private:
 
 public:
 
-  explicit Button(String text, e_handler_t &&click_handler = nullptr) : Component() {
+  explicit Button(String text, e_handler_t &&click_handler = nullptr) : InputComponent() {
     this->text_ = Observable<String>(this, text);
 
     this->style_->padding_ = {2, 2, 2, 2};

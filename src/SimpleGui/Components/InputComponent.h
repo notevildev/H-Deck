@@ -15,10 +15,12 @@ namespace SGui {
      */
     class InputComponent : public Component {
     public:
+      InputComponent() = default;
+      explicit InputComponent(int x = 0) : Component() {};
 
-        component_type_t type() const override { return CONTROL; };
+      component_type_t type() const override { return CONTROL; };
 
-        // Handle an input event (returns true if the event was handled)
-        virtual bool handle_input_event(input_event_t event, void* manager) { return 0; };
+      // Handle an input event (returns true if the event was handled)
+      virtual bool handle_input_event(input_event_t event, void* manager) { return 0; };
     };
 } // SGui

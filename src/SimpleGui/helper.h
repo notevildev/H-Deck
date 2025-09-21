@@ -21,10 +21,6 @@ namespace Keyboard {
 
 
 namespace SGui {
-
-// Constant storing the width of a single character
-const int16_t charWidth = tft.textWidth("A");
-
 // Find the true edges of the screen (useful for drawing around a screen border)
 // returns (width, height)
 std::pair<int, int> GetScreenEdges();

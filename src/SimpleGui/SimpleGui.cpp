@@ -9,8 +9,6 @@ namespace SGui {
     tft.setRotation(1);
     clearScreen();
 
-     //
-
     return new GUIManager();
   }
 }

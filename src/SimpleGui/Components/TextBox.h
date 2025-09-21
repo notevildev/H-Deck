@@ -4,11 +4,10 @@
 //
 
 #include "InputComponent.h"
-#include "../helper.h" // (already includes types.h)
-
 
 namespace SGui {
-  class TextBox : public InputComponent {
+
+class TextBox : public InputComponent {
   private:
     Observable<String> value_;
     String placeholder_ = "";
@@ -18,8 +17,9 @@ namespace SGui {
 
     // Default constructor
     TextBox() = default;
+
     // Explicit
-    explicit TextBox(String placeholder = "", e_handler_t &&value_changed_handler = nullptr) : Component() {
+    explicit TextBox(String placeholder = "", e_handler_t &&value_changed_handler = nullptr) : InputComponent() {
       this->value_ = Observable<String>(this, "");
       this->value_changed_handler_ = std::move(value_changed_handler);
 
@@ -28,7 +28,7 @@ namespace SGui {
       // if parent exists, set width to parent's width
       if (this->parent_) {
         this->size_.x = this->parent_->size_.x;
-      } else { this->size_.x = charWidth * 8; }
+      } else { this->size_.x = tft.textWidth("A") * 8; }
 
       this->size_.y = tft.fontHeight();
     }

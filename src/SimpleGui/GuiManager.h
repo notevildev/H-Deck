@@ -38,7 +38,6 @@ namespace SGui {
 
     GUIManager() {
       if (self_) { return; }
-
       keyboard_task_ = nullptr;
       trackball_ready_ = false;
       keyboard_ready_ = false;
