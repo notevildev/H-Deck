@@ -34,7 +34,7 @@ void setup() {
   Serial.println("Initializing TFT...");
   gui = Init();
   Serial.println("Enabling inputs...");
-  gui->enable_inputs();
+  gui->enable_trackball_input();
 
   Serial.println("Creating window...");
 
@@ -59,34 +59,21 @@ void setup() {
   Serial.println("Binding input events...");
   gui->bind_input_event(input_event_t{.type=TRACKBALL, .id=TRACKBALL_UP},
     [](GUIManager* self) {
-      Serial.println("TRACKBALL UP: Focusing previous...");
-      try {
-        self->get_active_window()->FocusPrev();
-      } catch (...) {
-        Serial.println("[!!!] Failed to focus previous");
-      }
+      self->get_active_window()->FocusPrev();
   });
 
   gui->bind_input_event(input_event_t{.type=TRACKBALL, .id=TRACKBALL_DOWN},
     [](GUIManager* self) {
-      Serial.println("TRACKBALL DOWN: Focusing next...");
-      try {
-        self->get_active_window()->FocusNext();
-      } catch (...) {
-        Serial.println("[!!!] Failed to focus next");
-      }
-
+      self->get_active_window()->FocusNext();
   });
 
   gui->bind_input_event(SGui::input_event_t{.type=TRACKBALL, .id=TRACKBALL_LEFT},
     [](GUIManager* self) {
-      Serial.println("TRACKBALL LEFT: Focusing previous...");
       self->get_active_window()->FocusPrev();
   });
 
   gui->bind_input_event(SGui::input_event_t{.type=TRACKBALL, .id=TRACKBALL_RIGHT},
     [](GUIManager* self) {
-      Serial.println("TRACKBALL RIGHT: Focusing next...");
       self->get_active_window()->FocusNext();
   });
 
@@ -99,6 +86,7 @@ void loop() {
    * 3.) Update UI
    * 4.) Render
    */
+
   // Serial.println("Handling Inputs...");
   gui->handle_inputs();
   // Serial.println("Drawing UI...");

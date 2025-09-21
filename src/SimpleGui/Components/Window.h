@@ -2,7 +2,7 @@
 
 #include <TFT_eSPI.h>
 
-#include "../types.h"
+#include "../Types/Enums.h"
 #include "../helper.h"
 #include "Container.h"
 
@@ -12,8 +12,6 @@ namespace SGui {
 
   // Window Component
   class Window : public Container {
-    Component* focused_ = nullptr;
-
    public:
     const UIBoxSpacing title_padding{4, 4, 4, 4};
     String title_ = ""; // Window title
@@ -57,9 +55,5 @@ namespace SGui {
 
     // Draw the window and its children
     void Draw() override;
-
-    // Invokes the component to be drawn to the screen if needed
-    // set force to bypass `isDirty()` check.
-    void Render(bool force = false) override;
   };
 }  // namespace SGui

@@ -1,27 +1,27 @@
 #pragma once
 
-#include "Component.h"
-#include "../types.h"
+#include "InputComponent.h"
+#include "../Types/Enums.h"
 
 namespace SGui {
-class Button : public Component {
-public:
-  String text_ = "";
-
+class Button : public InputComponent {
+private:
+  Observable<String> text_;
   e_handler_t click_handler_ = nullptr;
 
-  explicit Button(String text, e_handler_t &&click_handler = nullptr) : Component() {
-    this->text_ = text;
+public:
+
+  explicit Button(String text, e_handler_t &&click_handler = nullptr) : InputComponent() {
+    this->text_ = Observable<String>(this, text);
+
     this->style_->padding_ = {2, 2, 2, 2};
     this->click_handler_ = std::move(click_handler);
     this->size_.x = tft.textWidth(text);
     this->size_.y = tft.fontHeight();
   }
 
-  component_type_t type() const override { return CONTROL; };
-
   // Set the text of the button
-  Button* SetText(String text);
+  Button* SetText(const String& text);
 
   // Set the text size of the button
   // Default: 1
@@ -29,11 +29,6 @@ public:
 
   // Set the click handler of the button
   Button* SetClickHandler(e_handler_t &&handler);
-
-  // Set the button padding
-  Button* SetPadding(int x, int y);
-  Button* SetPadding(int top, int left, int bottom, int right);
-  Button* SetPadding(UIBoxSpacing padding);
 
   // Get the button text
   String GetText() const { return this->text_; }

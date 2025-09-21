@@ -143,4 +143,35 @@ namespace SGui {
 
     return this;
   }
+
+  // Set the padding of the component
+  Component* Component::SetPadding(uint16_t x, uint16_t y) {
+    this->style_->SetPadding({
+      x,
+      y,
+      x,
+      y
+    });
+    return this;
+  }
+
+  // Set the padding of the component
+  Component* Component::SetPadding(uint16_t top, uint16_t left, uint16_t bottom, uint16_t right) {
+
+    this->style_->SetPadding({
+      top,
+      right,
+      bottom,
+      left
+    });
+    return this;
+  }
+
+  // Set the padding of the component
+  Component* Component::SetPadding(UIBoxSpacing padding) {
+    this->style_->SetPadding(padding);
+    return this;
+  }
+
+
 }

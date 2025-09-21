@@ -64,18 +64,6 @@ namespace SGui {
     return this;
   }
 
-  // Invokes the component to be drawn to the screen if needed
-  // set force to bypass `isDirty()` check.
-  void Window::Render(bool force) {
-    if (force || this->isDirty()) {
-      this->Draw();
-      RenderChildren(this->isDirty());
-      this->dirty_ = false;
-      return;
-    }
-    RenderChildren(this->isDirty());
-  }
-
   // Draw the window and its children
   void Window::Draw() {
 

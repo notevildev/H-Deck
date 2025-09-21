@@ -1,8 +1,33 @@
 #include <utility>
 #include <TFT_eSPI.h>
 
-#include "types.h"
+#include "Types/Enums.h"
 #include "helper.h"
+
+#include <Wire.h>
+
+#include "GuiManager.h"
+
+namespace Keyboard {
+  char readKey() {
+    char keyValue = 0x00;
+    Wire.requestFrom(KEYBOARD_I2C_ADDR, 1);
+
+    while (Wire.available() > 0) {
+      keyValue = Wire.read();
+      // verify that a key is actually pressed
+      if (keyValue != (char)0x00) {
+#ifdef DEBUG
+        Serial.print("keyValue : ");
+        Serial.printf("%c (%d)\n", keyValue, (int)keyValue);
+#endif
+        break;
+      }
+    }
+
+    return keyValue;
+  }
+}
 
 namespace SGui {
 

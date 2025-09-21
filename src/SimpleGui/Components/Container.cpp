@@ -4,7 +4,7 @@
 
 #include <algorithm>
 
-#include "../helper.h"
+// #include "../helper.h"
 #include "Container.h"
 
 namespace SGui {
@@ -273,4 +273,17 @@ namespace SGui {
     }
     return this;
   }
+
+  // Invokes the container to be drawn to the screen if needed
+  // set force to bypass `isDirty()` check.
+  void Container::Render(bool force) {
+    if (force || this->isDirty()) {
+      this->Draw();
+      RenderChildren(this->isDirty());
+      this->dirty_ = false;
+      return;
+    }
+    RenderChildren(this->isDirty());
+  }
+
 }  // namespace SGui

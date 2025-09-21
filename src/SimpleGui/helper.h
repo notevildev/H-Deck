@@ -2,8 +2,22 @@
 
 #include <vector>
 #include <algorithm>
+#include <Arduino.h>
 
-#include "types.h"
+#include "Types/UIGeometry.h"
+
+
+namespace Keyboard {
+
+#define BACKSPACE 0x08
+#define ENTER 0x0D
+#define SPACE 0x20
+#define UPPER_DOLLARSIGN 0x04
+
+  char readKey();
+
+}
+
 
 namespace SGui {
 // Find the true edges of the screen (useful for drawing around a screen border)

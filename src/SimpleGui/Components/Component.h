@@ -2,11 +2,15 @@
 
 #include <vector>
 
-#include "../types.h"
-#include "../UIStyle.h"
-#include "../DefaultStyles.h"
+#include <TFT_eSPI.h>
+
+#include "../Types/Enums.h"
+#include "../Types/UIStyle.h"
 
 namespace SGui {
+
+static TFT_eSPI tft = TFT_eSPI();  // TFT display object
+
 // Base class for all UI components
 // Stores position, size, and parent component
 // (All components should inherit from this class)
@@ -20,25 +24,23 @@ protected:
   // *This function is only called when the component needs updated
   virtual void Draw() = 0;
 
-  // State wrapper class to automatically flag certain variables to trigger dynamic UI updates when changed
+  // Observable wrapper class to automatically flag certain variables to trigger dynamic UI updates when changed
   template <class T>
-  class State {
+  class Observable {
   private:
     T value_;
     Component* owner_ = nullptr;
 
   public:
-    State() = default;
-    explicit State(const T& value) : value_(value) {}
-    State(Component* owner, const T& value) : owner_(owner), value_(value) {}
+    Observable() = default;
+    explicit Observable(const T& value) : value_(value) {}
+    Observable(Component* owner, const T& value) : owner_(owner), value_(value) {}
 
     // General assignment
-    State& operator=(const T& value) {
+    Observable& operator=(const T& value) {
       if (value != value_) {
         this->value_ = value;
-        Serial.println("!!! STATE CHANGED");
         if (owner_) {
-          Serial.println("!!! INVALIDATING");
           owner_->Invalidate();
         }
       }
@@ -46,7 +48,7 @@ protected:
     }
 
     // Assignment from another State
-    State& operator=(const State& other) {
+    Observable& operator=(const Observable& other) {
       if (this != &other) {
         owner_ = other.owner_;
         *this = other.value_;
@@ -65,19 +67,19 @@ public:
   UIPoint pos_{0, 0}; // 2D point representing position
   UIRect size_{0, 0}; // 2D point representing size
 
+  Observable<bool> focused_; // focused state
+  Component* parent_ = nullptr;
+
   UIStyle* style_ = new UIStyle(*DEFAULT_STYLE);
   UIStyle* focused_style_ = new UIStyle(*DEFAULT_STYLE_FOCUSED);
 
-  State<bool> focused_; // focused state
-  Component* parent_ = nullptr;
-
   // Default constructor
-  Component() { this->focused_ = State<bool>(this, false); } // default constructor// default constructor
+  Component() { this->focused_ = Observable<bool>(this, false); } // default constructor// default constructor
   explicit Component(UIPoint position, UIRect dimensions, UIStyle* style, UIStyle* focused_style = DEFAULT_STYLE_FOCUSED,
                        Component* parent = nullptr)
       : pos_(position), size_(dimensions), style_(style), focused_style_(focused_style), parent_(parent) {
 
-    this->focused_ = State<bool>(this, false);
+    this->focused_ = Observable<bool>(this, false);
   }
 
   Component(const Component&) = delete;
@@ -151,6 +153,11 @@ public:
 
   // Set the parent of the component
   Component* SetParent(Component* parent);
+
+  // Set the padding of the component
+  Component* SetPadding(uint16_t x, uint16_t y);
+  Component* SetPadding(uint16_t top, uint16_t left, uint16_t bottom, uint16_t right);
+  Component* SetPadding(UIBoxSpacing padding);
 };
 
 typedef std::vector<Component*> ComponentList;

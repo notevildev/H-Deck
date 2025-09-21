@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "Component.h"
-#include "../DefaultStyles.h"
 
 namespace SGui {
 
@@ -57,6 +56,10 @@ public:
 
   // Draw just the children of the component (not the component itself)
   void RenderChildren(bool force = false);
+
+  // Invokes the container to be drawn to the screen if needed
+  // set force to bypass `isDirty()` check.
+  void Render(bool force = false) override;
 
   // Set the padding of the container
   virtual Container* SetPadding(int padding_top, int padding_right, int padding_bottom, int padding_left);
