@@ -1,6 +1,5 @@
 #pragma once
 
-#include "SimpleGui/GuiManager.h"
 #include "Component.h"
 
 //
@@ -16,7 +15,6 @@ namespace SGui {
     class InputComponent : public Component {
     public:
       InputComponent() = default;
-      explicit InputComponent(int x = 0) : Component() {};
 
       component_type_t type() const override { return CONTROL; };
 

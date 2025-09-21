@@ -7,11 +7,11 @@
 #include <vector>
 
 #include "helper.h"
-#include "types.h"
-#include "pins.h"
+#include "Types/Enums.h"
+#include "Types/pins.h"
 
-#include "UIColor.h"
-#include "UIStyle.h"
+#include "Types/UIColor.h"
+#include "Types/UIStyle.h"
 
 #include "components.h"
 

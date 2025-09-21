@@ -1,7 +1,7 @@
 #pragma once
 
 #include "InputComponent.h"
-#include "../types.h"
+#include "../Types/Enums.h"
 
 namespace SGui {
 class Button : public InputComponent {

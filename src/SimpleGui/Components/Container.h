@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "Component.h"
-#include "../DefaultStyles.h"
 
 namespace SGui {
 

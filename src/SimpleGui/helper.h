@@ -4,8 +4,7 @@
 #include <algorithm>
 #include <Arduino.h>
 
-#include "GuiManager.h"
-#include "types.h"
+#include "Types/UIGeometry.h"
 
 
 namespace Keyboard {

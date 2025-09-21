@@ -1,8 +1,12 @@
 #include <utility>
 #include <TFT_eSPI.h>
 
-#include "types.h"
+#include "Types/Enums.h"
 #include "helper.h"
+
+#include <Wire.h>
+
+#include "GuiManager.h"
 
 namespace Keyboard {
   char readKey() {

@@ -2,11 +2,15 @@
 
 #include <vector>
 
-#include "../types.h"
-#include "../UIStyle.h"
-#include "../DefaultStyles.h"
+#include <TFT_eSPI.h>
+
+#include "../Types/Enums.h"
+#include "../Types/UIStyle.h"
 
 namespace SGui {
+
+static TFT_eSPI tft = TFT_eSPI();  // TFT display object
+
 // Base class for all UI components
 // Stores position, size, and parent component
 // (All components should inherit from this class)

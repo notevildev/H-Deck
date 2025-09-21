@@ -3,10 +3,9 @@
 #include <map>
 #include <vector>
 
-#include "types.h"
-#include "pins.h"
-
-#include "components.h"
+#include "Types/Enums.h"
+#include "Utils/managed_buffer.h"
+#include "Components/Window.h"
 
 #define KEYBOARD_I2C_ADDR 0x55
 #define INPUT_EVENT_BUFFER_SIZE 32
@@ -30,23 +29,23 @@ namespace SGui {
     std::map<uint16_t, void(*)(GUIManager*)> input_handlers_;
 
     static GUIManager* self_;
-    static bool keyboard_ready_;
-    static bool trackball_ready_;
-    static void* keyboard_task_;
+    // static bool keyboard_ready_;
+    // static bool trackball_ready_;
+    // static void* keyboard_task_;
 
   public:
 
     GUIManager() {
       if (self_) { return; }
-      keyboard_task_ = nullptr;
-      trackball_ready_ = false;
-      keyboard_ready_ = false;
+      // keyboard_task_ = nullptr;
+      // trackball_ready_ = false;
+      // keyboard_ready_ = false;
       self_ = this;
     };
 
     // Destructor to clear the instance on deletion
     ~GUIManager() {
-      keyboard_task_ = nullptr;
+      // keyboard_task_ = nullptr;
       if (self_ == this) { // safety check, should never fail
         self_ = nullptr;
       }

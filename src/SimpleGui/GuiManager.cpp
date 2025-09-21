@@ -1,13 +1,14 @@
 // File: GuiManager.cpp
 
-#include "GuiManager.h"
-#include "types.h"
+#include <vector>
+#include <unordered_map>
 
 #include <Wire.h>
 #include <FreeRTOS.h>
 
-#include <vector>
-#include <unordered_map>
+#include "Types/pins.h"
+#include "Types/Enums.h"
+#include "GuiManager.h"
 
 
 namespace SGui {
@@ -15,7 +16,7 @@ namespace SGui {
   GUIManager* GUIManager::self_ = nullptr; // <- satisfy the linker
 
   void GUIManager::initialize_keyboard() const {
-    if (keyboard_ready_) return;
+    // if (keyboard_ready_) return;
     bool ready = false;
 
     // Verify peripheral power is enabled
@@ -41,31 +42,31 @@ namespace SGui {
     // Set the default backlight brightness level.
     setKeyboardBacklight(127, true);
 
-    keyboard_ready_ = true;
+    // keyboard_ready_ = true;
   }
 
   void GUIManager::enable_keyboard_input() const {
     // verify the keyboard is ready to use
     initialize_keyboard();
 
-    xTaskCreatePinnedToCore(
-      [](void* arg) {
-        GUIManager* gui = (GUIManager*)arg;
-        for (;;) {
-          char key;
-          while ((key = Keyboard::readKey()) != 0) {
-            gui->create_input_event(input_event_t{.type=KEYBOARD, .id=(uint16_t)key});
-          }
-          vTaskDelay(pdMS_TO_TICKS(10)); // sleep for 10ms
-        }
-      },
-      "keyboard_reader",
-      2048,
-      self_,
-      1,
-      &keyboard_task_,
-      APP_CPU_NUM
-    );
+    // xTaskCreatePinnedToCore(
+    //   [](void* arg) {
+    //     GUIManager* gui = (GUIManager*)arg;
+    //     for (;;) {
+    //       char key;
+    //       while ((key = Keyboard::readKey()) != 0) {
+    //         gui->create_input_event(input_event_t{.type=KEYBOARD, .id=(uint16_t)key});
+    //       }
+    //       vTaskDelay(pdMS_TO_TICKS(10)); // sleep for 10ms
+    //     }
+    //   },
+    //   "keyboard_reader",
+    //   2048,
+    //   self_,
+    //   1,
+    //   &keyboard_task_,
+    //   APP_CPU_NUM
+    // );
 
   }
 

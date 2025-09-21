@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Component.h"
-#include "../types.h"
+#include "../Types/Enums.h"
 
 namespace SGui {
 
