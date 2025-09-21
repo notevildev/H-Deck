@@ -7,7 +7,6 @@
 #include "Utils/managed_buffer.h"
 #include "Components/Window.h"
 
-#define KEYBOARD_I2C_ADDR 0x55
 #define INPUT_EVENT_BUFFER_SIZE 32
 
 namespace SGui {

@@ -10,6 +10,7 @@
 #include "Types/Enums.h"
 #include "GuiManager.h"
 
+#include "Utils/Keyboard.h"
 
 namespace SGui {
 
@@ -31,7 +32,7 @@ namespace SGui {
 
     // Verify the keyboard initializes properly
     while (!ready) {
-      Wire.requestFrom(KEYBOARD_I2C_ADDR, 1);
+      Wire.requestFrom(Keyboard::wire_address, (uint8_t)1);
       if (Wire.read() == -1) {
         Serial.println("Waiting for keyboard...");
         delay(500);
@@ -105,7 +106,7 @@ namespace SGui {
       * Brightness Range: 30 ~ 255
       * */
   void GUIManager::setKeyboardBacklight(uint8_t brightness, bool persist) const {
-    Wire.beginTransmission(KEYBOARD_I2C_ADDR);
+    Wire.beginTransmission(Keyboard::wire_address);
     Wire.write(persist ? 0x02 : 0x01); // 0x02 sets the default brightness
     Wire.write(brightness);
     Wire.endTransmission();
