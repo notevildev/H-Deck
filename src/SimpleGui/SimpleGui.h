@@ -13,7 +13,7 @@
 #include "Types/UIColor.h"
 #include "Types/UIStyle.h"
 
-#include "components.h"
+#include "Components/Components.h"
 
 #include "GuiManager.h"
 
