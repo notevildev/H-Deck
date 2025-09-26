@@ -6,14 +6,16 @@
 #include <utility>
 #include <vector>
 
-#include "helper.h"
-#include "Types/Enums.h"
 #include "Types/pins.h"
+#include "Types/enums.h"
+#include "Types/input.h"
+
+#include "helper.h"
 
 #include "Types/UIColor.h"
 #include "Types/UIStyle.h"
 
-#include "Components/Components.h"
+#include "Components/UIComponents.h"
 
 #include "GuiManager.h"
 

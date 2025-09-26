@@ -3,9 +3,10 @@
 #include <map>
 #include <vector>
 
-#include "Types/Enums.h"
-#include "Utils/managed_buffer.h"
 #include "Components/Window.h"
+#include "HID/DPad.h"
+#include "Types/input.h"
+#include "Utils/managed_buffer.h"
 
 #define INPUT_EVENT_BUFFER_SIZE 32
 
@@ -19,6 +20,7 @@ namespace SGui {
     std::pair<Component*, UIPoint> focused_ = {nullptr, { 0, 0 }};
     Window* active_window_ = nullptr;
 
+    HID::DPad* dpad_;
 
     // Current viewport (vector of pointers to each added window)
     viewport_t viewport_ = {};
@@ -28,23 +30,17 @@ namespace SGui {
     std::map<uint16_t, void(*)(GUIManager*)> input_handlers_;
 
     static GUIManager* self_;
-    // static bool keyboard_ready_;
-    // static bool trackball_ready_;
-    // static void* keyboard_task_;
 
   public:
 
     GUIManager() {
+      dpad_ = nullptr;
       if (self_) { return; }
-      // keyboard_task_ = nullptr;
-      // trackball_ready_ = false;
-      // keyboard_ready_ = false;
       self_ = this;
     };
 
     // Destructor to clear the instance on deletion
     ~GUIManager() {
-      // keyboard_task_ = nullptr;
       if (self_ == this) { // safety check, should never fail
         self_ = nullptr;
       }
@@ -58,8 +54,11 @@ namespace SGui {
 
     void initialize_trackball() const;
 
-    // Initialize the trackball (this MUST be called before use, or trackball navigation will not work)
-    void enable_trackball_input();
+    /* Adds default event handlers to enable D-Pad UI navigation
+     * Requires a pointer to a DPad object (e.g. TTrackball)
+     */
+
+    void enable_dpad_navigation(HID::DPad* dpad);
 
     /*
     * Dynamically modify the keyboard backlight brightness at runtime
@@ -68,9 +67,9 @@ namespace SGui {
     void setKeyboardBacklight(uint8_t brightness, bool persist = false) const;
 
     // Handles a single input_event_t from the input_queue
-    handler_exception_t handle(input_event_t input);
+    handler_status_t handle(input_event_t input);
     // Handles ALL inputs currently queued in the input_queue
-    handler_exception_t handle_inputs();
+    handler_status_t handle_inputs();
 
     // Returns pointer to the component that is currently input focused
     Component* get_focused_component() const { return this->focused_.first; }

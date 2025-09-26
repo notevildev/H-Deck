@@ -4,8 +4,8 @@
 
 #include <TFT_eSPI.h>
 
-#include "../Types/Enums.h"
 #include "../Types/UIStyle.h"
+#include "../Types/enums.h"
 
 namespace SGui {
 

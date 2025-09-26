@@ -2,7 +2,7 @@
 
 #include <TFT_eSPI.h>
 
-#include "../Types/Enums.h"
+#include "../Types/enums.h"
 #include "../helper.h"
 #include "Container.h"
 

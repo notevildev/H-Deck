@@ -29,7 +29,7 @@ namespace SGui {
   }
 
   // Set the click handler of the button
-  Button* Button::SetClickHandler(e_handler_t &&handler) {
+  Button* Button::SetClickHandler(event_handler_t &&handler) {
       this->click_handler_ = std::move(handler);
       return this;
   }

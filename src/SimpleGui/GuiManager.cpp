@@ -1,47 +1,20 @@
-// File: GuiManager.cpp
+#include "GuiManager.h"
 
 #include <vector>
 #include <unordered_map>
 
 #include <Wire.h>
-#include <FreeRTOS.h>
 
+#include "HID/DPad.h"
+#include "Types/input.h"
 #include "Types/pins.h"
-#include "Types/Enums.h"
-#include "GuiManager.h"
-
-#include "Utils/Keyboard.h"
 
 namespace SGui {
 
   GUIManager* GUIManager::self_ = nullptr; // <- satisfy the linker
 
   void GUIManager::initialize_keyboard() const {
-    // if (keyboard_ready_) return;
-    bool ready = false;
 
-    // Verify peripheral power is enabled
-    pinMode(POWER_ON_P, OUTPUT);
-    digitalWrite(POWER_ON_P, HIGH);
-
-    // Pause to let keyboard "boot"
-    delay(500);
-
-    // Verify I2C is initialized
-    Wire.begin(I2C_SDA_P, I2C_SCL_P);
-
-    // Verify the keyboard initializes properly
-    while (!ready) {
-      Wire.requestFrom(Keyboard::wire_address, (uint8_t)1);
-      if (Wire.read() == -1) {
-        Serial.println("Waiting for keyboard...");
-        delay(500);
-        continue;
-      }
-      ready = true;
-    }
-    // Set the default backlight brightness level.
-    setKeyboardBacklight(127, true);
 
     // keyboard_ready_ = true;
   }
@@ -50,78 +23,41 @@ namespace SGui {
     // verify the keyboard is ready to use
     initialize_keyboard();
 
-    // xTaskCreatePinnedToCore(
-    //   [](void* arg) {
-    //     GUIManager* gui = (GUIManager*)arg;
-    //     for (;;) {
-    //       char key;
-    //       while ((key = Keyboard::readKey()) != 0) {
-    //         gui->create_input_event(input_event_t{.type=KEYBOARD, .id=(uint16_t)key});
-    //       }
-    //       vTaskDelay(pdMS_TO_TICKS(10)); // sleep for 10ms
-    //     }
+  }
+
+  void GUIManager::enable_dpad_navigation(HID::DPad* dpad) {
+    this->dpad_ = dpad;
+    // TODO: Rework focus tracking
+    // TODO: Bind trackball inputs to change focused component
+    // this->bind_input_event(
+    //   {
+    //     .type=DPAD_PRESSED,
+    //     .id=HID::DPAD_UP
     //   },
-    //   "keyboard_reader",
-    //   2048,
-    //   self_,
-    //   1,
-    //   &keyboard_task_,
-    //   APP_CPU_NUM
+    //   [](GUIManager* gui) {
+    //     if (gui->active_window_ == nullptr) return;
+    //
+    //     if (focused_state.err_state == NO_CHILDREN) return;
+    //     if (focused_state.err_state == OUT_OF_BOUNDS) {
+    //       gui->active_window_->FocusChild(0);
+    //     }
+    //   }
     // );
-
-  }
-
-  void GUIManager::enable_trackball_input() {
-    // Verify pins are set up for input
-    pinMode(TRACKBALL_UP_P, INPUT_PULLUP);
-    pinMode(TRACKBALL_DOWN_P, INPUT_PULLUP);
-    pinMode(TRACKBALL_LEFT_P, INPUT_PULLUP);
-    pinMode(TRACKBALL_RIGHT_P, INPUT_PULLUP);
-
-    attachInterrupt(TRACKBALL_UP_P, [] {
-        self_->create_input_event(input_event_t{.type=TRACKBALL, .id=TRACKBALL_UP});
-    }, RISING);
-    attachInterrupt(TRACKBALL_DOWN_P, [] {
-        self_->create_input_event(input_event_t{.type=TRACKBALL, .id=TRACKBALL_DOWN});
-    }, RISING);
-    attachInterrupt(TRACKBALL_LEFT_P, [] {
-        self_->create_input_event(input_event_t{.type=TRACKBALL, .id=TRACKBALL_LEFT});
-    }, RISING);
-    attachInterrupt(TRACKBALL_RIGHT_P, [] {
-        self_->create_input_event(input_event_t{.type=TRACKBALL, .id=TRACKBALL_RIGHT});
-    }, RISING);
-    attachInterrupt(TRACKBALL_PRESS_P, [] {
-      self_->create_input_event(input_event_t{.type=TRACKBALL, .id=TRACKBALL_PRESS});
-    }, RISING);
-  }
-
-  /* Dynamically modify backlight brightness at runtime
-      *
-      * Setting persist to true will set the default backlight brightness level. If
-      * the user sets the backlight to 0 via setKeyboardBrightness, the default
-      * brightness is used when pressing ALT+B, rather than the backlight brightness
-      * level set by the user. This ensures that pressing ALT+B can respond to the
-      * backlight being turned on and off normally.
-      *
-      * Brightness Range: 30 ~ 255
-      * */
-  void GUIManager::setKeyboardBacklight(uint8_t brightness, bool persist) const {
-    Wire.beginTransmission(Keyboard::wire_address);
-    Wire.write(persist ? 0x02 : 0x01); // 0x02 sets the default brightness
-    Wire.write(brightness);
-    Wire.endTransmission();
   }
 
   // Handles a single input_event_t from the input_queue
-  handler_exception_t GUIManager::handle(input_event_t input) {
+  handler_status_t GUIManager::handle(input_event_t input) {
       uint16_t id = input.flatten();
 
       if (input_handlers_.find(id) != input_handlers_.end()) {
         try {
+#ifdef DEBUG
           Serial.printf("Handling event %d\n", id);
           Serial.printf("GUI manager at %p\n", self_);
+#endif
+
           input_handlers_[id](self_); // <- this is so fucking cursed lmfao
-          return OK;
+          return COMPLETE;
         } catch (...) {
           return BAD_HANDLER;
         }
@@ -130,9 +66,9 @@ namespace SGui {
   }
 
   // Handles ALL inputs currently queued in the input_queue
-  handler_exception_t GUIManager::handle_inputs() {
+  handler_status_t GUIManager::handle_inputs() {
     while (!input_queue_.empty()) {
-      handler_exception_t status = handle(input_queue_[0]);
+      handler_status_t status = handle(input_queue_[0]);
 
       if (status == BAD_HANDLER) {
         Serial.println("ERROR");
@@ -141,7 +77,7 @@ namespace SGui {
 
       input_queue_.pop_first();
     }
-    return OK;
+    return COMPLETE;
   }
 
   // Adds a window to the viewport

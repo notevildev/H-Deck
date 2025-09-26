@@ -11,7 +11,7 @@ class TextBox : public InputComponent {
   private:
     Observable<String> value_;
     String placeholder_ = "";
-    e_handler_t value_changed_handler_ = nullptr;
+    event_handler_t value_changed_handler_ = nullptr;
 
   public:
 
@@ -19,7 +19,7 @@ class TextBox : public InputComponent {
     TextBox() = default;
 
     // Explicit
-    explicit TextBox(String placeholder = "", e_handler_t &&value_changed_handler = nullptr) : InputComponent() {
+    explicit TextBox(String placeholder = "", event_handler_t &&value_changed_handler = nullptr) : InputComponent() {
       this->value_ = Observable<String>(this, "");
       this->value_changed_handler_ = std::move(value_changed_handler);
 
@@ -39,7 +39,7 @@ class TextBox : public InputComponent {
     TextBox* SetText(String text);
 
     // Set the value changed handler of the TextBox
-    TextBox* SetValueChangedHandler(e_handler_t &&handler);
+    TextBox* SetValueChangedHandler(event_handler_t &&handler);
 
     // Set the placeholder text of the TextBox
     TextBox* SetPlaceholder(String placeholder);

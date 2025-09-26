@@ -4,6 +4,7 @@
 #include "main.h"
 
 #include "SimpleGui/SimpleGui.h"
+#include "SimpleGui/HID/DPad.h"
 
 #define MAX_FRAMERATE 15
 
@@ -34,7 +35,7 @@ void setup() {
   Serial.println("Initializing TFT...");
   gui = Init();
   Serial.println("Enabling inputs...");
-  gui->enable_trackball_input();
+  gui->enable_dpad_navigation(nullptr); // TODO: REMEMBER TO FIX THIS!!!
 
   Serial.println("Creating window...");
 
@@ -57,26 +58,6 @@ void setup() {
   gui->add_window(window);
 
   Serial.println("Binding input events...");
-  gui->bind_input_event(input_event_t{.type=TRACKBALL, .id=TRACKBALL_UP},
-    [](GUIManager* self) {
-      self->get_active_window()->FocusPrev();
-  });
-
-  gui->bind_input_event(input_event_t{.type=TRACKBALL, .id=TRACKBALL_DOWN},
-    [](GUIManager* self) {
-      self->get_active_window()->FocusNext();
-  });
-
-  gui->bind_input_event(SGui::input_event_t{.type=TRACKBALL, .id=TRACKBALL_LEFT},
-    [](GUIManager* self) {
-      self->get_active_window()->FocusPrev();
-  });
-
-  gui->bind_input_event(SGui::input_event_t{.type=TRACKBALL, .id=TRACKBALL_RIGHT},
-    [](GUIManager* self) {
-      self->get_active_window()->FocusNext();
-  });
-
 }
 
 void loop() {

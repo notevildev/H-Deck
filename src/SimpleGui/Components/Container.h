@@ -27,6 +27,7 @@ protected:
     -1
   };
 
+
 public:
   UIOrientation orientation_ = VERTICAL;
 
@@ -39,6 +40,8 @@ public:
 
   component_type_t type() const override { return CONTAINER; }
 
+  Component* FindNextFocusableChild(search_direction_t direction);
+
   // Returns a list of pointers to recursive children
   // ***Starts with the component itself
   ComponentList Children() override;
@@ -46,10 +49,22 @@ public:
   // Returns a list of pointers to direct children (not recursive)
   ComponentList DirectChildren() const { return children_; }
 
-  // Focus the next child component
-  UIContainerFocusState FocusNext();
-  // Focus the previous child component
+  /* Focus the next deepest available child component
+   * Will recursively search through any child containers, dynamically
+   * passing focus reassignment to the deepest available focusable child.
+   *
+   * (Should be called on the outermost parent)
+   */
+  UIContainerFocusState FocusNext(search_direction_t direction = FORWARD);
+
+  /* Focus the previous deepest available child component
+   * Will recursively search through any child contianers, dynamically
+   * passing focus reassignment to the deepest available focusable child.
+   *
+   * (Should be called on the outermost parent)
+   */
   UIContainerFocusState FocusPrev();
+
   // Focus the specified child component
   UIContainerFocusState FocusChild(int index);
   UIContainerFocusState FocusChild(Component* child);

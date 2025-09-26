@@ -1,21 +1,21 @@
 #pragma once
 
+#include "../Types/enums.h"
 #include "InputComponent.h"
-#include "../Types/Enums.h"
 
 namespace SGui {
 class Button : public InputComponent {
 private:
   Observable<String> text_;
-  e_handler_t click_handler_ = nullptr;
+  event_handler_t click_handler_ = nullptr;
 
 public:
 
-  explicit Button(String text, e_handler_t &&click_handler = nullptr) : InputComponent() {
+  explicit Button(String text, event_handler_t &&click_handler = nullptr) : InputComponent() {
     this->text_ = Observable<String>(this, text);
 
     this->style_->padding_ = {2, 2, 2, 2};
-    this->click_handler_ = std::move(click_handler);
+    this->click_handler_ = click_handler;
     this->size_.x = tft.textWidth(text);
     this->size_.y = tft.fontHeight();
   }
@@ -28,7 +28,7 @@ public:
   Button* SetTextSize(uint8_t text_size);
 
   // Set the click handler of the button
-  Button* SetClickHandler(e_handler_t &&handler);
+  Button* SetClickHandler(event_handler_t &&handler);
 
   // Get the button text
   String GetText() const { return this->text_; }

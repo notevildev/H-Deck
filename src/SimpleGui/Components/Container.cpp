@@ -9,6 +9,41 @@
 
 namespace SGui {
 
+  Component* Container::FindNextFocusableChild(search_direction_t direction) {
+    int i = this->focused_state_.index;
+
+    // No children?
+    if (this->children_.empty()) { return nullptr; }
+
+      // handle edge case
+      if (direction == BACKWARD && i == -1)
+        i = (int)this->children_.size();
+
+      // Iterate through children in the specified direction
+      // (loop condition depends on scan direction)
+      while (direction == FORWARD ? i < (int)this->children_.size() - 1 : i > 0) {
+        i = i + (direction == FORWARD ? 1 : -1); // move to the next or previous child
+        Component* child = this->children_[i];
+
+        // Is child an input?
+        if (child->type() == CONTROL) {
+          // Update the state and return success
+          return this->children_[i];
+        }
+
+        // Recurse into child container(s)
+        if (child->type() == CONTAINER) {
+          Component* subchild = FindNextFocusableChild(direction);
+          if (subchild && subchild != this->focused_state_.component) {
+            return subchild;
+          }
+        }
+      }
+
+      return this->focused_state_.component;
+  }
+
+
   // Returns a list of pointers to recursive children
   // ***Starts with the component itself
   ComponentList Container::Children() {
@@ -28,13 +63,16 @@ namespace SGui {
     return output;
   }
 
-  // Focus the next child component
-  UIContainerFocusState Container::FocusNext() {
-
-    int i = this->focused_state_.index;
-
+  /* Focus the next deepest available child component
+   * Will recursively search through any child containers, dynamically
+   * passing focus reassignment to the deepest available focusable child.
+   *
+   * (Should be called on the outermost parent)
+   */
+  UIContainerFocusState Container::FocusNext(search_direction_t direction) {
+    Component* prev_focusable_child = FindNextFocusableChild(direction);
     // No children?
-    if (this->children_.empty()) {
+    if (!prev_focusable_child) {
       // Trigger error state
       this->focused_state_.index = -1;
       this->focused_state_.component = nullptr;
@@ -42,79 +80,37 @@ namespace SGui {
       goto end;
     }
 
-    while (i < (int)this->children_.size() - 1) {
-      i++; // move to the next child
 
-      // Is this an input?
-      if (this->children_[i]->type() == CONTROL) {
-        // Update the state and return success
-        this->focused_state_.index = i;
-        if (this->focused_state_.component) {
-          this->focused_state_.component->Unfocus(); // unfocus component before updating
-        }
-        this->focused_state_.component = this->children_[this->focused_state_.index]->Focus();
-        this->focused_state_.err_state = SUCCESS;
-        goto end;
-      }
+    // We're already focused on the first control, return out of bounds
+    if (prev_focusable_child == this->focused_state_.component) {
+      this->focused_state_.err_state = OUT_OF_BOUNDS;
+      goto end;
     }
 
-    // don't change focus, just return out of bounds
-    // (reached when we're already selecting the last control)
-    this->focused_state_.err_state = OUT_OF_BOUNDS;
+    this->focused_state_.index++;
+    this->focused_state_.component->Unfocus();
+    this->focused_state_.component = prev_focusable_child->Focus();
+    this->focused_state_.err_state = SUCCESS;
 
     end:
-    #ifdef DEBUG
-    Serial.printf("Focused Index: %d\n", focused_state_.index);
+#ifdef DEBUG
+    Serial.printf("Focused Index: %d\n", this->focused_state_.index);
     Serial.printf("Error: %d\n", this->focused_state_.err_state);
-    Serial.printf("Pointer: %p\n", this->children_[focused_state_.index]);
-    #endif
+    Serial.printf("Pointer: %p\n", this->focused_state_.component);
+#endif
 
     return this->focused_state_;
   }
 
 
-  // Focus the previous child component
+  /* Focus the previous deepest available child component
+   * Will recursively search through any child contianers, dynamically
+   * passing focus reassignment to the deepest available focusable child.
+   *
+   * (Should be called on the outermost parent)
+   */
   UIContainerFocusState Container::FocusPrev() {
-
-    int i = this->focused_state_.index;
-
-    // No children?
-    if (this->children_.empty()) {
-      // Trigger error state
-      this->focused_state_.index = -1;
-      this->focused_state_.component = nullptr;
-      this->focused_state_.err_state = NO_CHILDREN;
-      goto end;
-    }
-
-    while (i > 0) {
-      i--; // move to the previous child
-
-      // Is this an input?
-      if (this->children_[i]->type() == CONTROL) {
-        // update the state and return success
-        this->focused_state_.index = max(i, 0); // prevent from sub-zero index
-        if (this->focused_state_.component) {
-          this->focused_state_.component->Unfocus(); // unfocus component before updating
-        }
-        this->focused_state_.component = this->children_[this->focused_state_.index]->Focus();
-        this->focused_state_.err_state = SUCCESS;
-        goto end;
-      }
-    }
-
-    // don't change focus, just return out of bounds
-    // (reached when we're already selecting the last control)
-    this->focused_state_.err_state = OUT_OF_BOUNDS;
-
-    end:
-    #ifdef DEBUG
-    Serial.printf("Focused Index: %d\n", focused_state_.index);
-    Serial.printf("Error: %d\n", this->focused_state_.err_state);
-    Serial.printf("Pointer: %p\n", this->children_[focused_state_.index]);
-    #endif
-
-    return this->focused_state_;
+    return FocusNext(BACKWARD);
   }
 
 

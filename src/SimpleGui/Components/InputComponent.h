@@ -2,6 +2,8 @@
 
 #include "Component.h"
 
+#include "../Types/input.h"
+
 //
 // Created by rondotdll on 9/18/25.
 //
