@@ -10,6 +10,8 @@
 
 #include "../Utils/managed_buffer.h"
 
+#define INPUT_EVENT_BUFFER_SIZE 16
+
 namespace SGui {
 
 /* Input types for input events
@@ -62,6 +64,6 @@ enum handler_status_t {
 
 typedef void(*event_handler_t)();
 
-typedef managed_buffer<input_event_t, 16> input_event_queue_t;
+typedef managed_buffer<input_event_t, INPUT_EVENT_BUFFER_SIZE> input_event_queue_t;
 
 }

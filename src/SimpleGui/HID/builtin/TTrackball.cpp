@@ -8,127 +8,112 @@
 
 namespace SGui {
 namespace HID {
+  /* Attach interrupts to trackball pins */
+void TTrackball::AttachInterrupts() const {
+  if (initialized_) return; // no duplicate interrupts!
 
-  void TTrackball::Init() {
-    /* The trackball button is also the boot pin for the board,
-     * which might cause issues down the road.
-     *
-     * poor design choice by LilyGo :/
-     */
+  //////////////////////////////////////////////
+  //////////////// TRACKBALL_UP ////////////////
+  //////////////////////////////////////////////
+  attachInterruptArg(TRACKBALL_UP_P, [](void* arg) {
+    auto self = static_cast<TTrackball*>(arg);
 
-    pinMode(TRACKBALL_BUTTON_P, INPUT_PULLUP);
-
-    /* set trackball pins to use pullup resistors
-     * (required for reading input correctly)
-     */
-    pinMode(TRACKBALL_UP_P, INPUT_PULLUP);
-    pinMode(TRACKBALL_DOWN_P, INPUT_PULLUP);
-    pinMode(TRACKBALL_LEFT_P, INPUT_PULLUP);
-    pinMode(TRACKBALL_RIGHT_P, INPUT_PULLUP);
-
-    /* Attach interrupts to trackball pins */
-    //////////////////////////////////////////////
-    //////////////// TRACKBALL_UP ////////////////
-    //////////////////////////////////////////////
-    attachInterruptArg(TRACKBALL_UP_P, [](void* arg) {
-      auto self = (TTrackball*)arg;
-
-      self->input_event_queue_->push(
-        {
-          .type=DPAD_PRESSED,
-          .id=DPAD_UP
-        }
-      );
+    self->input_event_queue_->push(
+      {
+        .type=DPAD_PRESSED,
+        .id=DPAD_UP
+      }
+    );
 
 #ifdef DEBUG
-      Serial.println("Trackball Scrolled Up");
+    Serial.println("Trackball Scrolled Up");
 #endif
-    },
-    this,
-    FALLING);
+  },
+  const_cast<TTrackball*>(this),
+  FALLING);
 
 
-    ////////////////////////////////////////////////
-    //////////////// TRACKBALL_DOWN ////////////////
-    ////////////////////////////////////////////////
-    attachInterruptArg(TRACKBALL_DOWN_P, [](void* arg) {
-      auto self = (TTrackball*)arg;
+  ////////////////////////////////////////////////
+  //////////////// TRACKBALL_DOWN ////////////////
+  ////////////////////////////////////////////////
+  attachInterruptArg(TRACKBALL_DOWN_P, [](void* arg) {
+    auto self = static_cast<TTrackball*>(arg);
 
-      self->input_event_queue_->push(
-        {
-          .type=DPAD_PRESSED,
-          .id=DPAD_DOWN
-        }
-      );
+    self->input_event_queue_->push(
+      {
+        .type=DPAD_PRESSED,
+        .id=DPAD_DOWN
+      }
+    );
 
 #ifdef DEBUG
-      Serial.println("Trackball Scrolled Down");
+    Serial.println("Trackball Scrolled Down");
 #endif
-    },
-    this,
-    FALLING);
+  },
+  const_cast<TTrackball*>(this),
+  FALLING);
 
-    ////////////////////////////////////////////////
-    //////////////// TRACKBALL_LEFT ////////////////
-    ////////////////////////////////////////////////
-    attachInterruptArg(TRACKBALL_LEFT_P, [](void* arg) {
-      auto self = (TTrackball*)arg;
+  ////////////////////////////////////////////////
+  //////////////// TRACKBALL_LEFT ////////////////
+  ////////////////////////////////////////////////
+  attachInterruptArg(TRACKBALL_LEFT_P, [](void* arg) {
+    auto self = static_cast<TTrackball*>(arg);
 
-      self->input_event_queue_->push(
-        {
-          .type=DPAD_PRESSED,
-          .id=DPAD_LEFT
-        }
-      );
+    self->input_event_queue_->push(
+      {
+        .type=DPAD_PRESSED,
+        .id=DPAD_LEFT
+      }
+    );
 
 #ifdef DEBUG
-      Serial.println("Trackball Scrolled Left");
+    Serial.println("Trackball Scrolled Left");
 #endif
-    },
-    this,
-    FALLING);
+  },
+  const_cast<TTrackball*>(this),
+  FALLING);
 
-    ////////////////////////////////////////////////
-    //////////////// TRACKBALL_RIGHT ////////////////
-    ////////////////////////////////////////////////
-    attachInterruptArg(TRACKBALL_RIGHT_P, [](void* arg) {
-      auto self = (TTrackball*)arg;
+  ////////////////////////////////////////////////
+  //////////////// TRACKBALL_RIGHT ////////////////
+  ////////////////////////////////////////////////
+  attachInterruptArg(TRACKBALL_RIGHT_P, [](void* arg) {
+    auto self = static_cast<TTrackball*>(arg);
 
-      self->input_event_queue_->push(
-        {
-          .type=DPAD_PRESSED,
-          .id=DPAD_LEFT
-        }
-      );
+    self->input_event_queue_->push(
+      {
+        .type=DPAD_PRESSED,
+        .id=DPAD_LEFT
+      }
+    );
 
-    #ifdef DEBUG
-      Serial.println("Trackball Scrolled Right");
-    #endif
-    },
-    this,
-    FALLING);
+  #ifdef DEBUG
+    Serial.println("Trackball Scrolled Right");
+  #endif
+  },
+  const_cast<TTrackball*>(this),
+  FALLING);
 
-    ////////////////////////////////////////////////
-    //////////////// TRACKBALL_BUTTON ////////////////
-    ////////////////////////////////////////////////
-    attachInterruptArg(TRACKBALL_BUTTON_P, [](void* arg) {
-      auto self = (TTrackball*)arg;
+  ////////////////////////////////////////////////
+  //////////////// TRACKBALL_BUTTON ////////////////
+  ////////////////////////////////////////////////
+  attachInterruptArg(TRACKBALL_BUTTON_P, [](void* arg) {
+    auto self = static_cast<TTrackball*>(arg);
 
-      self->input_event_queue_->push(
-        {
-          .type=DPAD_PRESSED,
-          .id=DPAD_CENTER
-        }
-      );
+    self->input_event_queue_->push(
+      {
+        .type=DPAD_PRESSED,
+        .id=DPAD_CENTER
+      }
+    );
 
-    #ifdef DEBUG
-      Serial.println("Trackball Button Pressed");
-    #endif
-    },
-    this,
-    FALLING);
-  };
+  #ifdef DEBUG
+    Serial.println("Trackball Button Pressed");
+  #endif
+  },
+  const_cast<TTrackball*>(this),
+  FALLING);
 
-
+  initialized_ = true;
+};
 } // namespace HID
 } // namespace SGui

@@ -29,16 +29,54 @@ class TKeyboard : public Keyboard {
   // T-Keyboard's I2C address
   uint8_t wire_address_;
 
+  static bool initialized_;
+
   // Read a single keypress from the T-Keyboard
   char readKey();
 
   // Enables & setups the keyboard software to begin polling
   // Called by Init()
-  void Enable();
+  void Enable() const;
 
  public:
-  explicit TKeyboard(input_event_queue_t* input_event_queue, uint8_t wire_address = 0x55): Keyboard(input_event_queue) {
+  explicit TKeyboard(input_event_queue_t* input_event_queue, uint8_t wire_address = 0x55) : Keyboard(input_event_queue) {
+    tkb_poll_task_ = nullptr;
     this->wire_address_ = wire_address;
+
+    this->Enable();
+
+    xTaskCreatePinnedToCore(
+      [](void* arg) {
+        TKeyboard* self = (TKeyboard*)arg;
+
+        for (;;) {
+          char key;
+          while ((key = self->readKey()) != 0) {
+
+            // handle native keypress event (if it exists)
+            if (self->onKeyPress_) {
+              if (self->onKeyPress_(key) == COMPLETE /* (COMPLETE) */) {
+                continue; // skip adding to input queue if event was handled completely
+              }
+            }
+
+            self->input_event_queue_->push(
+              input_event_t{
+                .type=KEY_PRESSED,
+                .id=(uint8_t)key}
+            );
+          }
+          vTaskDelay(pdMS_TO_TICKS(10)); // sleep for 10ms
+        }
+      },
+      "keyboard_reader",
+      2048,
+      this,
+      1,
+      &this->tkb_poll_task_,
+      APP_CPU_NUM
+    );
+
   }
 
   ~TKeyboard() {
@@ -47,9 +85,9 @@ class TKeyboard : public Keyboard {
     }
   }
 
-  void setKeyboardBacklight(uint8_t brightness, bool persist) const;
+  bool Ready() const override { return initialized_; }
 
-  void Init() override;
+  void setKeyboardBacklight(uint8_t brightness, bool persist) const;
 
 };
 

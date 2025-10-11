@@ -33,9 +33,9 @@ void setup() {
   digitalWrite(TFT_BACKLIGHT_P, HIGH);
 
   Serial.println("Initializing TFT...");
-  gui = Init();
+  gui = GUIManager::New();
   Serial.println("Enabling inputs...");
-  gui->enable_dpad_navigation(nullptr); // TODO: REMEMBER TO FIX THIS!!!
+  gui->enable_dpad_navigation(nullptr); // FIXME: REMEMBER TO FIX THIS!!!
 
   Serial.println("Creating window...");
 

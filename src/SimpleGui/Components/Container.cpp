@@ -9,40 +9,91 @@
 
 namespace SGui {
 
-  Component* Container::FindNextFocusableChild(search_direction_t direction) {
-    int i = this->focused_state_.index;
+// TODO: Focus management can be significantly optimized by taking advantage of Contianer::Children()
+  focus_search_status_t Container::FocusNext(search_direction_t direction) {
 
-    // No children?
-    if (this->children_.empty()) { return nullptr; }
-
-      // handle edge case
-      if (direction == BACKWARD && i == -1)
-        i = (int)this->children_.size();
-
-      // Iterate through children in the specified direction
-      // (loop condition depends on scan direction)
-      while (direction == FORWARD ? i < (int)this->children_.size() - 1 : i > 0) {
-        i = i + (direction == FORWARD ? 1 : -1); // move to the next or previous child
-        Component* child = this->children_[i];
-
-        // Is child an input?
-        if (child->type() == CONTROL) {
-          // Update the state and return success
-          return this->children_[i];
-        }
-
-        // Recurse into child container(s)
-        if (child->type() == CONTAINER) {
-          Component* subchild = FindNextFocusableChild(direction);
-          if (subchild && subchild != this->focused_state_.component) {
-            return subchild;
-          }
-        }
+    // No Children?
+    if (this->children_.size() == 0) {
+      if (this->focused_.component) {
+        this->focused_.component->Unfocus(); // edge case
       }
 
-      return this->focused_state_.component;
+      this->focused_.component = nullptr;
+      this->focused_.index = -1;
+      return NO_CHILDREN;
+    }
+
+    focus_search_status_t search_status;
+
+    // is something focused? if not, we can skip a bit
+    if (!this->focused_.component || this->focused_.index < 0) {
+      if (direction == BACKWARD) {
+        return OUT_OF_BOUNDS;
+      }
+      goto scan_children;
+    }
+
+    // Are we currently focusing on another container?
+    if (this->focused_.component->type() == CONTAINER) {
+      // [recurse]
+      search_status = static_cast<Container*>(this->focused_.component)->FocusNext();
+
+      if (search_status == SUCCESS) {
+        return SUCCESS;
+      }
+
+      if (search_status == NO_CHILDREN) {
+        this->focused_.component->Unfocus(); // unfocus previous
+      }
+    }
+
+    // Scan for the next focusable child in the current scope
+  scan_children:
+    uint16_t i = (direction == FORWARD) ? (this->focused_.index + 1) : 0;
+
+    while ((direction == FORWARD) ? i < this->children_.size() : i > this->children_.size() - 1) {
+      Component* child = this->children_[i];
+
+      // if the next scanned child is a control, go ahead and focus it.
+      if (child->type() == CONTROL) {
+        this->focused_.component->Unfocus(); // unfocus previous
+
+        this->focused_.index = i;
+        this->focused_.component = child->Focus();
+        return SUCCESS;
+      }
+
+      // if the next scanned child is a container, recurse into it.
+      if (child->type() == CONTAINER) {
+        search_status = static_cast<Container*>(child)->FocusNext(direction);
+
+        if (search_status != SUCCESS)
+          i = (direction == FORWARD) ? (i + 1) : (i - 1); // move to the next child
+          continue;
+
+        this->focused_.component->Unfocus(); // unfocus previous
+
+        this->focused_.component = child;
+        this->focused_.index = i;
+        return SUCCESS;
+      }
+    }
+
+    return OUT_OF_BOUNDS;
   }
 
+
+  Component* Container::Unfocus() {
+    if (this->focused_.component) {
+      this->focused_.component->Unfocus();
+
+      this->focused_.component = nullptr;
+      this->focused_.index = -1;
+    }
+
+    this->has_focus_ = false;
+    return this;
+  }
 
   // Returns a list of pointers to recursive children
   // ***Starts with the component itself
@@ -61,125 +112,6 @@ namespace SGui {
     }
 
     return output;
-  }
-
-  /* Focus the next deepest available child component
-   * Will recursively search through any child containers, dynamically
-   * passing focus reassignment to the deepest available focusable child.
-   *
-   * (Should be called on the outermost parent)
-   */
-  UIContainerFocusState Container::FocusNext(search_direction_t direction) {
-    Component* prev_focusable_child = FindNextFocusableChild(direction);
-    // No children?
-    if (!prev_focusable_child) {
-      // Trigger error state
-      this->focused_state_.index = -1;
-      this->focused_state_.component = nullptr;
-      this->focused_state_.err_state = NO_CHILDREN;
-      goto end;
-    }
-
-
-    // We're already focused on the first control, return out of bounds
-    if (prev_focusable_child == this->focused_state_.component) {
-      this->focused_state_.err_state = OUT_OF_BOUNDS;
-      goto end;
-    }
-
-    this->focused_state_.index++;
-    this->focused_state_.component->Unfocus();
-    this->focused_state_.component = prev_focusable_child->Focus();
-    this->focused_state_.err_state = SUCCESS;
-
-    end:
-#ifdef DEBUG
-    Serial.printf("Focused Index: %d\n", this->focused_state_.index);
-    Serial.printf("Error: %d\n", this->focused_state_.err_state);
-    Serial.printf("Pointer: %p\n", this->focused_state_.component);
-#endif
-
-    return this->focused_state_;
-  }
-
-
-  /* Focus the previous deepest available child component
-   * Will recursively search through any child contianers, dynamically
-   * passing focus reassignment to the deepest available focusable child.
-   *
-   * (Should be called on the outermost parent)
-   */
-  UIContainerFocusState Container::FocusPrev() {
-    return FocusNext(BACKWARD);
-  }
-
-
-  // Focus the specified child component
-  UIContainerFocusState Container::FocusChild(int index) {
-    // No children?
-    if (this->children_.empty()) {
-      this->focused_state_.component = nullptr;
-      this->focused_state_.index = -1;
-      this->focused_state_.err_state = NO_CHILDREN;
-      return this->focused_state_;
-    }
-
-    // Verify index is within bounds
-    if (index >= 0 && index < this->children_.size()) {
-      // Is this an input?
-      if (this->children_[index]->type() == CONTROL) {
-        if (this->focused_state_.component != nullptr) {
-          this->focused_state_.component->Unfocus(); // unfocus component before updating
-        }
-        this->focused_state_.component = this->children_[index]->Focus();
-        this->focused_state_.index = index;
-        this->focused_state_.err_state = SUCCESS;
-        return this->focused_state_;
-      }
-
-      // don't change focus, just return delinquent child
-      this->focused_state_.err_state = DELINQUENT_CHILD;
-      return this->focused_state_;
-    }
-
-    // don't change focus, just return out of bounds
-    this->focused_state_.err_state = OUT_OF_BOUNDS;
-    this->focused_state_.index = max(
-          distance(this->children_.begin(), find(this->children_.begin(), this->children_.end(), this->focused_state_.component)) - 1, 0
-        ); // blame C++ iterators for this garbage syntax
-    return this->focused_state_;
-  }
-
-
-  // Focus the specified child component
-  UIContainerFocusState Container::FocusChild(Component* child) {
-    // No children?
-    if (this->children_.empty()) {
-      this->focused_state_.err_state = NO_CHILDREN;
-      this->focused_state_.component = nullptr;
-      this->focused_state_.index = -1;
-      goto end;
-    }
-
-    if (child->type() == CONTROL) {
-      for (int i = 0; i < this->children_.size(); i++) {
-        if (this->children_[i] == child) {
-          if (this->focused_state_.component != nullptr) {
-            this->focused_state_.component->Unfocus(); // unfocus component before updating
-          }
-          this->focused_state_.component = child->Focus();
-          this->focused_state_.index = i;
-          this->focused_state_.err_state = SUCCESS;
-          goto end;
-        }
-      }
-      this->focused_state_.err_state = OUT_OF_BOUNDS;
-      goto end;
-    }
-    this->focused_state_.err_state = DELINQUENT_CHILD;
-
-    end:
-    return this->focused_state_;
   }
 
 

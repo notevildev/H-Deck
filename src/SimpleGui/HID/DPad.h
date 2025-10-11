@@ -37,9 +37,15 @@ protected:
   dpad_handler_t onRelease_ = nullptr;
 
 public:
+  virtual ~DPad() = default;
+
   explicit DPad(input_event_queue_t* input_event_queue) {
     this->input_event_queue_ = input_event_queue;
   }
+
+  /* Check if the keyboard has been successfully initialized and is ready for use
+   */
+   virtual bool Ready() const { return true; }
 
   /* Bind a function to the onPress event
 
@@ -57,8 +63,6 @@ public:
    */
   void onRelease(dpad_handler_t handler);
 
-
-  virtual void Init() = 0;
 };
 
 } // namespace HID

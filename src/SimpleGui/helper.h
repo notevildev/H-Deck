@@ -19,6 +19,17 @@ float slope(UIPoint p1, UIPoint p2);
 void clearScreen();
 
 template <typename T>
+inline int indexOf(T item, std::vector<T> vector) {
+  for (unsigned int i = 0; i < vector.size(); i++) {
+    if (vector[i] == item) {
+      return i;
+    }
+  }
+
+  return -1;
+}
+
+template <typename T>
 // Check if a vector contains a value
 inline bool v_includes(const std::vector<T>& vec, const T& value) {
   if (vec.empty())

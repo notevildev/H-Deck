@@ -38,7 +38,7 @@ namespace SGui {
   void Button::Draw() {
     UIStyle* style = this->style_;
 
-    if (this->focused_) { style = this->focused_style_; }
+    if (this->has_focus_) { style = this->focused_style_; }
 
     // Clear the button background
     tft.fillRect(this->pos_.x, this->pos_.y,

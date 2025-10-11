@@ -12,8 +12,9 @@
 namespace SGui {
 namespace HID {
 
-void TKeyboard::Enable() {
-  // if (keyboard_ready_) return;
+void TKeyboard::Enable() const {
+  if (initialized_) return; // no duplicate initialization!
+
   bool ready = false;
 
   // Verify peripheral power is enabled
@@ -24,7 +25,7 @@ void TKeyboard::Enable() {
   delay(500);
 
   // Verify I2C is initialized
-  Wire.begin(I2C_SDA_P, I2C_SCL_P);
+  initialized_ = Wire.begin(I2C_SDA_P, I2C_SCL_P);
 
   // Verify the keyboard initializes properly
   while (!ready) {
@@ -78,42 +79,5 @@ void TKeyboard::setKeyboardBacklight(uint8_t brightness, bool persist) const {
   Wire.write(brightness);
   Wire.endTransmission();
 }
-
-void TKeyboard::Init() {
-    this->Enable();
-
-    xTaskCreatePinnedToCore(
-      [](void* arg) {
-        TKeyboard* self = (TKeyboard*)arg;
-
-        for (;;) {
-          char key;
-          while ((key = self->readKey()) != 0) {
-
-            // handle native keypress event (if it exists)
-            if (self->onKeyPress_) {
-              if (self->onKeyPress_(key) == COMPLETE /* (COMPLETE) */) {
-                continue; // skip adding to input queue if event was handled completely
-              }
-            }
-
-            self->input_event_queue_->push(
-              input_event_t{
-                .type=KEY_PRESSED,
-                .id=(uint16_t)key}
-            );
-          }
-          vTaskDelay(pdMS_TO_TICKS(10)); // sleep for 10ms
-        }
-      },
-      "keyboard_reader",
-      2048,
-      this,
-      1,
-      &this->tkb_poll_task_,
-      APP_CPU_NUM
-    );
-}
-
 }  // namespace HID
 }  // namespace SGui

@@ -29,9 +29,14 @@ class Keyboard {
   virtual void HandleEvent(input_event_t, char);
 
  public:
-  explicit Keyboard(input_event_queue_t* input_buffer) {;
-    this->input_event_queue_ = input_buffer;
+  explicit Keyboard(input_event_queue_t* input_event_queue) {
+    this->input_event_queue_ = input_event_queue;
   };
+  virtual ~Keyboard() = default;
+
+  /* Check if the keyboard has been successfully initialized and is ready for use
+   */
+  virtual bool Ready() const { return true; }
 
   /* Bind a function to the onKey event
 
@@ -56,9 +61,7 @@ class Keyboard {
    * to prevent it from being passed to input_event_queue.
    */
   void onKeyRelease(keyboard_handler_t handler);
-
-  // Should create / start any tasks related to keyboard input polling
-  virtual void Init() = 0;
 };
+
 }  // namespace HID
 }  // namespace SGui

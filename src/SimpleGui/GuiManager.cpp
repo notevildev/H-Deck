@@ -11,23 +11,27 @@
 
 namespace SGui {
 
-  GUIManager* GUIManager::self_ = nullptr; // <- satisfy the linker
+  GUIManager* GUIManager::self_ = nullptr; // <- satisfy the linker (for whatever reason)
 
-  void GUIManager::initialize_keyboard() const {
+  GUIManager* GUIManager::New() {
+    if (self_) { return self_; }
 
+    tft.init();
+    tft.setRotation(1);
+    clearScreen();
 
-    // keyboard_ready_ = true;
+    self_ = new GUIManager();
+    return self_;
   }
 
-  void GUIManager::enable_keyboard_input() const {
+  void GUIManager::enable_keyboard_input(HID::Keyboard* keyboard) {
     // verify the keyboard is ready to use
-    initialize_keyboard();
+    // this->keyboard_
 
   }
 
   void GUIManager::enable_dpad_navigation(HID::DPad* dpad) {
     this->dpad_ = dpad;
-    // TODO: Rework focus tracking
     // TODO: Bind trackball inputs to change focused component
     // this->bind_input_event(
     //   {
@@ -43,6 +47,65 @@ namespace SGui {
     //     }
     //   }
     // );
+  }
+
+  focus_search_status_t GUIManager::focus_next_component(UIOrientation orientation) {
+    // this whole condition is just to handle edge cases
+    if (this->viewport_.empty()) {
+      if (this->active_window_) {
+        this->active_window_->Unfocus();
+
+        this->active_window_ = nullptr;
+        this->active_window_index_ = -1;
+      }
+
+      if (this->focused_component_) {
+        this->focused_component_->Unfocus();
+      }
+
+      return NO_CHILDREN;
+    }
+
+    // 0 or current selected index
+    int i = (this->active_window_index_ < 0 ? 0 : this->active_window_index_);
+
+    this->active_window_ = this->viewport_[i]; // guard rail; shouldn't really change anything
+    auto focus_status = this->active_window_->FocusNext();
+    bool ACTIVE_HAS_NO_CHILDREN = (focus_status == NO_CHILDREN);
+
+    if (focus_status == SUCCESS) {
+      this->focused_component_ = this->active_window_->FocusedComponent();
+      return SUCCESS;
+    }
+
+    // foreach (window in this->viewport_) ...
+    while (i < this->viewport_.size() - 1) {
+      i++;
+      focus_status = this->viewport_[i]->FocusNext();
+
+      if (focus_status == SUCCESS) {
+        this->active_window_ = this->viewport_[i];
+        this->focused_component_ = this->active_window_->FocusedComponent();
+        return SUCCESS;
+      }
+    };
+
+    if (ACTIVE_HAS_NO_CHILDREN) {
+      if (this->active_window_) {
+        this->active_window_->Unfocus();
+
+        this->active_window_ = nullptr;
+        this->active_window_index_ = -1;
+      }
+
+      if (this->focused_component_) {
+        this->focused_component_->Unfocus();
+        this->focused_component_ = nullptr;
+      }
+    }
+
+    return OUT_OF_BOUNDS;
+
   }
 
   // Handles a single input_event_t from the input_queue
@@ -85,6 +148,7 @@ namespace SGui {
     this->viewport_.push_back(window);
     if (this->active_window_ == nullptr) {
       this->active_window_ = window;
+      this->active_window_index_ = indexOf(this->active_window_, this->viewport_);
     }
   }
 
@@ -92,6 +156,7 @@ namespace SGui {
   void GUIManager::remove_window(Window* window) {
     if (this->active_window_ == window) {
       this->active_window_ = nullptr;
+      this->active_window_index_ = -1;
     }
     this->viewport_.erase(std::remove(this->viewport_.begin(), this->viewport_.end(), window), this->viewport_.end());
   }
@@ -99,6 +164,7 @@ namespace SGui {
   // Sets the active window (window to be drawn
   void GUIManager::set_active_window(Window* window) {
     this->active_window_ = window;
+    this->active_window_index_ = indexOf(window, this->viewport_);
   }
 
   // Binds an in put event to a handler (void function pointer)

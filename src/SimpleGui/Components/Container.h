@@ -1,17 +1,12 @@
 #pragma once
 
-#include <utility>
 #include <vector>
+#include <utility>
 
 #include "Component.h"
+#include "SimpleGui/Types/UIFocusState.h"
 
 namespace SGui {
-
-struct UIContainerFocusState{
-  focus_state_status_t err_state;
-  Component* component;
-  int index;
-};
 
 // Expanded UIComponent class for all NESTING UI components
 // Stores horizontal padding, vertical padding, and child components
@@ -20,13 +15,7 @@ class Container : public Component {
 protected:
   ComponentList children_ = {};
   UIRect content_size_ {0, 0};
-
-  UIContainerFocusState focused_state_ = {
-    NO_CHILDREN,
-    nullptr,
-    -1
-  };
-
+  UIFocusState focused_ {nullptr, -1};
 
 public:
   UIOrientation orientation_ = VERTICAL;
@@ -38,9 +27,29 @@ public:
   __always_inline uint16_t ContentWidth() const { return this->content_size_.x; }
   __always_inline uint16_t ContentHeight() const { return this->content_size_.y; }
 
+  Component* FocusedComponent() const {
+    if (!this->focused_.component)
+      return nullptr;
+
+    Component* c = this->focused_.component;
+    while (c->type() == CONTAINER) {
+      c = static_cast<Container*>(c)->FocusedComponent();
+    }
+    return c;
+  }
+
   component_type_t type() const override { return CONTAINER; }
 
-  Component* FindNextFocusableChild(search_direction_t direction);
+  /* Focus the next deepest available child component
+ * Will recursively search through any child containers, dynamically
+ * passing focus reassignment to the deepest available focusable child.
+ *
+ * (Should be called on the outermost parent)
+ */
+  focus_search_status_t FocusNext(search_direction_t direction = FORWARD);
+
+  // Recursively unfocus self and any focused child
+  Component* Unfocus() override;
 
   // Returns a list of pointers to recursive children
   // ***Starts with the component itself
@@ -49,25 +58,9 @@ public:
   // Returns a list of pointers to direct children (not recursive)
   ComponentList DirectChildren() const { return children_; }
 
-  /* Focus the next deepest available child component
-   * Will recursively search through any child containers, dynamically
-   * passing focus reassignment to the deepest available focusable child.
-   *
-   * (Should be called on the outermost parent)
-   */
-  UIContainerFocusState FocusNext(search_direction_t direction = FORWARD);
-
-  /* Focus the previous deepest available child component
-   * Will recursively search through any child contianers, dynamically
-   * passing focus reassignment to the deepest available focusable child.
-   *
-   * (Should be called on the outermost parent)
-   */
-  UIContainerFocusState FocusPrev();
-
   // Focus the specified child component
-  UIContainerFocusState FocusChild(int index);
-  UIContainerFocusState FocusChild(Component* child);
+  // UIContainerFocusState FocusChild(int index);
+  // UIContainerFocusState FocusChild(Component* child);
 
   // Draw just the children of the component (not the component itself)
   void RenderChildren(bool force = false);
@@ -86,4 +79,5 @@ public:
   virtual Container* AddChildren(ComponentList children);
 
 };
+
 }  // namespace SGui

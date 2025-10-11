@@ -3,12 +3,12 @@
 #include <map>
 #include <vector>
 
-#include "Components/Window.h"
-#include "HID/DPad.h"
-#include "Types/input.h"
 #include "Utils/managed_buffer.h"
-
-#define INPUT_EVENT_BUFFER_SIZE 32
+#include "Components/Window.h"
+#include "Types/input.h"
+#include "Types/UIFocusState.h"
+#include "HID/DPad.h"
+#include "HID/Keyboard.h"
 
 namespace SGui {
   // Vector of Window pointers
@@ -17,27 +17,37 @@ namespace SGui {
   // namespace SGui
   class GUIManager {
   private:
-    std::pair<Component*, UIPoint> focused_ = {nullptr, { 0, 0 }};
     Window* active_window_ = nullptr;
+    int16_t active_window_index_ = -1;
+
+    Component* focused_component_;
 
     HID::DPad* dpad_;
+    HID::Keyboard* keyboard_;
 
     // Current viewport (vector of pointers to each added window)
     viewport_t viewport_ = {};
 
     // Input queue (managed buffer to prevent overflow)
-    managed_buffer<input_event_t, INPUT_EVENT_BUFFER_SIZE> input_queue_ = {};
+    input_event_queue_t input_queue_ = {};
     std::map<uint16_t, void(*)(GUIManager*)> input_handlers_;
 
-    static GUIManager* self_;
-
-  public:
+    static GUIManager* self_; // used to verify singleton instance
 
     GUIManager() {
-      dpad_ = nullptr;
-      if (self_) { return; }
+      if (self_) { return; } // should never happen
+
       self_ = this;
+      dpad_ = nullptr;
+      keyboard_ = nullptr;
+      focused_component_ = nullptr;
     };
+
+  public:
+    /* Use this function to create a new global GUIManager instance
+     * Safety check verifies no accidental duplicate instances are created
+     */
+    static GUIManager* New();
 
     // Destructor to clear the instance on deletion
     ~GUIManager() {
@@ -46,19 +56,29 @@ namespace SGui {
       }
     }
 
-    // Initialize the keyboard (this MUST be called before use, or keyboard input will not work)
-    void initialize_keyboard() const;
+
 
     // Enables keyboard input handling (this MUST be called after initialize_keyboard())
-    void enable_keyboard_input() const;
-
-    void initialize_trackball() const;
+    void enable_keyboard_input(HID::Keyboard* keyboard);
 
     /* Adds default event handlers to enable D-Pad UI navigation
      * Requires a pointer to a DPad object (e.g. TTrackball)
      */
-
     void enable_dpad_navigation(HID::DPad* dpad);
+
+    /* Focus the next available focusable components
+     * Recursively seeks out the next focusable component in the
+     * specified orientation (Horizontal -> Left, Vertical -> Down)
+     */
+    focus_search_status_t focus_next_component(UIOrientation orientation = VERTICAL);
+
+    /* Focus the previous available focusable components
+     * Recursively seeks out the next focusable component in the
+     * specified orientation (Horizontal -> Left, Vertical -> Down)
+     */
+    void focus_prev_component(UIOrientation orientation = VERTICAL);
+
+
 
     /*
     * Dynamically modify the keyboard backlight brightness at runtime
@@ -72,13 +92,13 @@ namespace SGui {
     handler_status_t handle_inputs();
 
     // Returns pointer to the component that is currently input focused
-    Component* get_focused_component() const { return this->focused_.first; }
+    Component* get_focused_component() const { return this->focused_component_; }
     // Returns pointer to the active window
     Window* get_active_window() const { return this->active_window_;}
     // Returns the current viewport (vector of pointers to each added window)
     viewport_t get_viewport() const {return this->viewport_;}
     // Returns pointer to the current input queue
-    const managed_buffer<input_event_t, INPUT_EVENT_BUFFER_SIZE>* get_input_queue() const {return &this->input_queue_;}
+    const input_event_queue_t* get_input_queue() const {return &this->input_queue_;}
 
     // Adds a window to the viewportf
     void add_window(Window* window);
