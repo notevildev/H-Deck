@@ -6,13 +6,12 @@
 #include "Utils/managed_buffer.h"
 #include "Components/Window.h"
 #include "Types/input.h"
-#include "Types/UIFocusState.h"
 #include "HID/DPad.h"
 #include "HID/Keyboard.h"
 
 namespace SGui {
   // Vector of Window pointers
-  typedef std::vector<Window*> viewport_t;
+  typedef std::vector<Window*> WindowList;
 
   // namespace SGui
   class GUIManager {
@@ -26,7 +25,7 @@ namespace SGui {
     HID::Keyboard* keyboard_;
 
     // Current viewport (vector of pointers to each added window)
-    viewport_t viewport_ = {};
+    WindowList viewport_ = {};
 
     // Input queue (managed buffer to prevent overflow)
     input_event_queue_t input_queue_ = {};
@@ -96,7 +95,7 @@ namespace SGui {
     // Returns pointer to the active window
     Window* get_active_window() const { return this->active_window_;}
     // Returns the current viewport (vector of pointers to each added window)
-    viewport_t get_viewport() const {return this->viewport_;}
+    WindowList get_viewport() const {return this->viewport_;}
     // Returns pointer to the current input queue
     const input_event_queue_t* get_input_queue() const {return &this->input_queue_;}
 

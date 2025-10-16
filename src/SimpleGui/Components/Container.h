@@ -4,7 +4,6 @@
 #include <utility>
 
 #include "Component.h"
-#include "SimpleGui/Types/UIFocusState.h"
 
 namespace SGui {
 
@@ -15,7 +14,6 @@ class Container : public Component {
 protected:
   ComponentList children_ = {};
   UIRect content_size_ {0, 0};
-  UIFocusState focused_ {nullptr, -1};
 
 public:
   UIOrientation orientation_ = VERTICAL;
@@ -27,29 +25,8 @@ public:
   __always_inline uint16_t ContentWidth() const { return this->content_size_.x; }
   __always_inline uint16_t ContentHeight() const { return this->content_size_.y; }
 
-  Component* FocusedComponent() const {
-    if (!this->focused_.component)
-      return nullptr;
-
-    Component* c = this->focused_.component;
-    while (c->type() == CONTAINER) {
-      c = static_cast<Container*>(c)->FocusedComponent();
-    }
-    return c;
-  }
-
+  // Function to return a component's type (NORMAL, CONTROL, or CONTAINER)
   component_type_t type() const override { return CONTAINER; }
-
-  /* Focus the next deepest available child component
- * Will recursively search through any child containers, dynamically
- * passing focus reassignment to the deepest available focusable child.
- *
- * (Should be called on the outermost parent)
- */
-  focus_search_status_t FocusNext(search_direction_t direction = FORWARD);
-
-  // Recursively unfocus self and any focused child
-  Component* Unfocus() override;
 
   // Returns a list of pointers to recursive children
   // ***Starts with the component itself

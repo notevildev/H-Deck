@@ -50,7 +50,7 @@ namespace SGui {
   }
 
   focus_search_status_t GUIManager::focus_next_component(UIOrientation orientation) {
-    // this whole condition is just to handle edge cases
+    // this whole condition is just to handle edge-cases
     if (this->viewport_.empty()) {
       if (this->active_window_) {
         this->active_window_->Unfocus();
@@ -66,46 +66,41 @@ namespace SGui {
       return NO_CHILDREN;
     }
 
-    // 0 or current selected index
-    int i = (this->active_window_index_ < 0 ? 0 : this->active_window_index_);
-
-    this->active_window_ = this->viewport_[i]; // guard rail; shouldn't really change anything
-    auto focus_status = this->active_window_->FocusNext();
-    bool ACTIVE_HAS_NO_CHILDREN = (focus_status == NO_CHILDREN);
-
-    if (focus_status == SUCCESS) {
-      this->focused_component_ = this->active_window_->FocusedComponent();
-      return SUCCESS;
+    if (!active_window_) {
+      this->set_active_window(this->viewport_[0]);
     }
 
-    // foreach (window in this->viewport_) ...
-    while (i < this->viewport_.size() - 1) {
+    ComponentList all_children = this->active_window_->Children();
+
+    int i = 0;
+    Component* firstFocusable = nullptr;
+    bool found_focused = false;
+    for (Component* child : all_children) {
+      if (child->type() == CONTROL) {
+        if (found_focused) {
+          this->focused_component_->Unfocus();
+          this->focused_component_ = child->Focus();
+          return SUCCESS;
+        }
+
+        if (!firstFocusable) {
+          firstFocusable = child;
+        }
+      }
+
+      if (child == this->focused_component_) {
+        found_focused = true;
+      }
+
+
       i++;
-      focus_status = this->viewport_[i]->FocusNext();
-
-      if (focus_status == SUCCESS) {
-        this->active_window_ = this->viewport_[i];
-        this->focused_component_ = this->active_window_->FocusedComponent();
-        return SUCCESS;
-      }
-    };
-
-    if (ACTIVE_HAS_NO_CHILDREN) {
-      if (this->active_window_) {
-        this->active_window_->Unfocus();
-
-        this->active_window_ = nullptr;
-        this->active_window_index_ = -1;
-      }
-
-      if (this->focused_component_) {
-        this->focused_component_->Unfocus();
-        this->focused_component_ = nullptr;
-      }
     }
 
-    return OUT_OF_BOUNDS;
+    if (found_focused) return OUT_OF_BOUNDS;
 
+    this->focused_component_->Unfocus();
+    this->focused_component_ = firstFocusable->Focus();
+    return SUCCESS;
   }
 
   // Handles a single input_event_t from the input_queue
@@ -163,7 +158,15 @@ namespace SGui {
 
   // Sets the active window (window to be drawn
   void GUIManager::set_active_window(Window* window) {
+    this->focused_component_ = nullptr;
     this->active_window_ = window;
+
+    if (!this->active_window_) {
+      this->active_window_index_ = -1;
+      return;
+    }
+
+    this->focus_next_component();
     this->active_window_index_ = indexOf(window, this->viewport_);
   }
 
