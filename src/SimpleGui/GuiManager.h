@@ -75,7 +75,7 @@ namespace SGui {
      * Recursively seeks out the next focusable component in the
      * specified orientation (Horizontal -> Left, Vertical -> Down)
      */
-    void focus_prev_component(UIOrientation orientation = VERTICAL);
+    focus_search_status_t focus_prev_component(UIOrientation orientation = VERTICAL);
 
 
 
@@ -97,7 +97,7 @@ namespace SGui {
     // Returns the current viewport (vector of pointers to each added window)
     WindowList get_viewport() const {return this->viewport_;}
     // Returns pointer to the current input queue
-    const input_event_queue_t* get_input_queue() const {return &this->input_queue_;}
+    input_event_queue_t* get_input_queue() {return &this->input_queue_;}
 
     // Adds a window to the viewportf
     void add_window(Window* window);

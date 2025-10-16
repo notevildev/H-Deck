@@ -12,6 +12,8 @@
 namespace SGui {
 namespace HID {
 
+bool TKeyboard::initialized_ = false; // satisfy the linker
+
 void TKeyboard::Enable() const {
   if (initialized_) return; // no duplicate initialization!
 

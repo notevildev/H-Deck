@@ -6,9 +6,13 @@
 
 #include "TTrackball.h"
 
+
 namespace SGui {
 namespace HID {
-  /* Attach interrupts to trackball pins */
+
+bool TTrackball::initialized_ = false; // satisfy the linker
+
+/* Attach interrupts to trackball pins */
 void TTrackball::AttachInterrupts() const {
   if (initialized_) return; // no duplicate interrupts!
 

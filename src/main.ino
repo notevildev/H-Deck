@@ -3,8 +3,9 @@
 
 #include "main.h"
 
-#include "SimpleGui/SimpleGui.h"
 #include "SimpleGui/HID/DPad.h"
+#include "SimpleGui/HID/builtin/TTrackball.h"
+#include "SimpleGui/SimpleGui.h"
 
 #define MAX_FRAMERATE 15
 
@@ -24,6 +25,7 @@ using namespace SGui;
 
 static Window* window;
 static GUIManager* gui;
+static HID::TTrackball* trackball;
 
 void setup() {
   Serial.begin(115200);
@@ -34,8 +36,10 @@ void setup() {
 
   Serial.println("Initializing TFT...");
   gui = GUIManager::New();
+
   Serial.println("Enabling inputs...");
-  gui->enable_dpad_navigation(nullptr); // FIXME: REMEMBER TO FIX THIS!!!
+  trackball = new HID::TTrackball(gui->get_input_queue());
+  gui->enable_dpad_navigation(trackball);
 
   Serial.println("Creating window...");
 
