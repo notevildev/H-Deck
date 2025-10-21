@@ -38,7 +38,10 @@ void GUIManager::enable_dpad_navigation(HID::DPad* dpad) {
       .id = HID::DPAD_UP
     },
     [](GUIManager* gui) {
-         gui->focus_prev_component(UIOrientation::VERTICAL);
+#ifdef DEBUG
+      Serial.println("D-Pad UP pressed");
+#endif
+      gui->focus_prev_component(VERTICAL);
   });
 
   this->bind_input_event({
@@ -46,7 +49,10 @@ void GUIManager::enable_dpad_navigation(HID::DPad* dpad) {
       .id = HID::DPAD_DOWN
     },
     [](GUIManager* gui) {
-         gui->focus_next_component(UIOrientation::VERTICAL);
+#ifdef DEBUG
+        Serial.println("D-Pad DOWN pressed");
+#endif
+         gui->focus_next_component(VERTICAL);
   });
 
   this->bind_input_event({
@@ -54,7 +60,11 @@ void GUIManager::enable_dpad_navigation(HID::DPad* dpad) {
       .id = HID::DPAD_LEFT
     },
     [](GUIManager* gui) {
-         gui->focus_prev_component(UIOrientation::HORIZONTAL);
+#ifdef DEBUG
+        Serial.println("D-Pad LEFT pressed");
+#endif
+
+         gui->focus_prev_component(HORIZONTAL);
   });
 
   this->bind_input_event({
@@ -62,6 +72,10 @@ void GUIManager::enable_dpad_navigation(HID::DPad* dpad) {
       .id = HID::DPAD_RIGHT
     },
     [](GUIManager* gui) {
+#ifdef DEBUG
+        Serial.println("D-Pad RIGHT pressed");
+#endif
+
          gui->focus_next_component(UIOrientation::HORIZONTAL);
   });
 }
@@ -91,11 +105,15 @@ focus_search_status_t GUIManager::focus_next_component(UIOrientation orientation
 
   int i = 0;
   Component* firstFocusable = nullptr;
-  bool found_focused = false;
+  bool found_focused = (this->focused_component_ == nullptr); // forces to first focus the first component if none is focused
+
   for (Component* child : all_children) {
     if (child->type() == CONTROL) {
+
       if (found_focused) {
-        this->focused_component_->Unfocus();
+        if (this->focused_component_) { // handle no focused component
+          this->focused_component_->Unfocus();
+        }
         this->focused_component_ = child->Focus();
         return SUCCESS;
       }
@@ -104,7 +122,6 @@ focus_search_status_t GUIManager::focus_next_component(UIOrientation orientation
         firstFocusable = child;
       }
     }
-
     if (child == this->focused_component_) {
       found_focused = true;
     }
@@ -112,7 +129,7 @@ focus_search_status_t GUIManager::focus_next_component(UIOrientation orientation
     i++;
   }
 
-  if (found_focused)
+  if (!found_focused)
     return OUT_OF_BOUNDS;
 
   this->focused_component_->Unfocus();
@@ -148,13 +165,15 @@ focus_search_status_t GUIManager::focus_prev_component(UIOrientation orientation
   ComponentList all_children = this->active_window_->Children();
 
   Component* firstFocusable = nullptr;
-  bool found_focused = false;
+  bool found_focused = (this->focused_component_ == nullptr); // forces to first focus the first component if none is focused
 
   for (int i = all_children.size() - 1; i >= 1; i--) { // first child is always the window
     Component* child = all_children[i];
     if (child->type() == CONTROL) {
       if (found_focused) {
-        this->focused_component_->Unfocus();
+        if (this->focused_component_) { // handle no focused component
+          this->focused_component_->Unfocus();
+        }
         this->focused_component_ = child->Focus();
         return SUCCESS;
       }
@@ -169,7 +188,7 @@ focus_search_status_t GUIManager::focus_prev_component(UIOrientation orientation
     }
   }
 
-  if (found_focused)
+  if (!found_focused)
     return OUT_OF_BOUNDS;
 
   this->focused_component_->Unfocus();
@@ -184,21 +203,25 @@ focus_search_status_t GUIManager::focus_prev_component(UIOrientation orientation
 // Handles a single input_event_t from the input_queue
 handler_status_t GUIManager::handle(input_event_t input) {
   uint16_t id = input.flatten();
-
-  if (input_handlers_.find(id) != input_handlers_.end()) {
-    try {
 #ifdef DEBUG
-      Serial.printf("Handling event %d\n", id);
-      Serial.printf("GUI manager at %p\n", self_);
+  Serial.printf("Handling event %u\n", id);
+  Serial.printf("GUI manager this=%p\n", this);
 #endif
 
-      input_handlers_[id](self_);  // <- this is so fucking cursed lmfao
+  auto i = input_handlers_.find(id);
+
+  if (i == input_handlers_.end()) {
+#ifdef DEBUG
+    Serial.println("[*] Failed to find a suitable handler");
+#endif
+    return NO_HANDLER;
+  }
+    try {
+      i->second(self_);  // <- this is so fucking cursed lmfao
       return COMPLETE;
     } catch (...) {
       return BAD_HANDLER;
     }
-  }
-  return NO_HANDLER;
 }
 
 // Handles ALL inputs currently queued in the input_queue

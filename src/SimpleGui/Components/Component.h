@@ -70,21 +70,24 @@ public:
   Observable<bool> has_focus_; // focused state
   Component* parent_ = nullptr;
 
-  UIStyle* style_;
-  UIStyle* focused_style_;
+  UIStyle* style_ = nullptr;
+  UIStyle* focused_style_ = nullptr;
 
   // Default constructor
-  Component() { this->has_focus_ = Observable<bool>(this, false); } // default constructor// default constructor
+  Component() {
+    this->has_focus_ = Observable<bool>(this, false);
+    this->style_ = new UIStyle(DEFAULT_STYLE);
+    this->focused_style_ = new UIStyle(this->style_->HighContrast());
+  } // default constructor// default constructor
   explicit Component(UIPoint position, UIRect dimensions, UIStyle* style, UIStyle* focused_style = nullptr,
                        Component* parent = nullptr)
       : pos_(position), size_(dimensions), style_(style), focused_style_(focused_style), parent_(parent) {
 
     this->has_focus_ = Observable<bool>(this, false);
-    this->style_ = new UIStyle(DEFAULT_STYLE);
 
-    if (!focused_style) {
-      this->focused_style_ = new UIStyle(this->style_->HighContrast());
-    }
+    this->style_ = style;
+    this->focused_style_ = focused_style ? focused_style : new UIStyle(this->style_->HighContrast());
+
   }
 
   Component(const Component&) = delete;

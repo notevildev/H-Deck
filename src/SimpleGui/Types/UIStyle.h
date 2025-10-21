@@ -21,6 +21,12 @@ public:
           border_thickness_(border_thickness), text_size_(text_size), padding_(padding) {
     }
 
+    // Enable copying/moving; explicit for clarity
+    UIStyle(const UIStyle&) = default;
+    UIStyle& operator=(const UIStyle&) = default;
+    UIStyle(UIStyle&&) = default;
+    UIStyle& operator=(UIStyle&&) = default;
+
     // Returns a high contrast version of this style (NOT A POINTER)
     // inverts background and foreground
     // [used for focused components]
@@ -89,5 +95,4 @@ static const UIStyle DEFAULT_STYLE = {
   } // padding
 };
 
-static const UIStyle DEFAULT_STYLE_FOCUSED = DEFAULT_STYLE.HighContrast();
 }
