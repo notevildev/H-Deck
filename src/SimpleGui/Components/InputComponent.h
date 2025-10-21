@@ -2,8 +2,10 @@
 
 #include "Component.h"
 
+#include "../Types/input.h"
+
 //
-// Created by David J on 9/18/25.
+// Created by rondotdll on 9/18/25.
 //
 
 
@@ -18,7 +20,7 @@ namespace SGui {
 
       component_type_t type() const override { return CONTROL; };
 
-      // Handle an input event (returns true if the event was handled)
+      // Handle an input event (returns true if the event doesn't require handling by the GUIManager)
       virtual bool handle_input_event(input_event_t event, void* manager) { return 0; };
     };
 } // SGui

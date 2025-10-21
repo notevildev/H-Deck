@@ -4,8 +4,8 @@
 
 #include <TFT_eSPI.h>
 
-#include "../Types/Enums.h"
 #include "../Types/UIStyle.h"
+#include "../Types/enums.h"
 
 namespace SGui {
 
@@ -67,19 +67,27 @@ public:
   UIPoint pos_{0, 0}; // 2D point representing position
   UIRect size_{0, 0}; // 2D point representing size
 
-  Observable<bool> focused_; // focused state
+  Observable<bool> has_focus_; // focused state
   Component* parent_ = nullptr;
 
-  UIStyle* style_ = new UIStyle(*DEFAULT_STYLE);
-  UIStyle* focused_style_ = new UIStyle(*DEFAULT_STYLE_FOCUSED);
+  UIStyle* style_ = nullptr;
+  UIStyle* focused_style_ = nullptr;
 
   // Default constructor
-  Component() { this->focused_ = Observable<bool>(this, false); } // default constructor// default constructor
-  explicit Component(UIPoint position, UIRect dimensions, UIStyle* style, UIStyle* focused_style = DEFAULT_STYLE_FOCUSED,
+  Component() {
+    this->has_focus_ = Observable<bool>(this, false);
+    this->style_ = new UIStyle(DEFAULT_STYLE);
+    this->focused_style_ = new UIStyle(this->style_->HighContrast());
+  } // default constructor// default constructor
+  explicit Component(UIPoint position, UIRect dimensions, UIStyle* style, UIStyle* focused_style = nullptr,
                        Component* parent = nullptr)
       : pos_(position), size_(dimensions), style_(style), focused_style_(focused_style), parent_(parent) {
 
-    this->focused_ = Observable<bool>(this, false);
+    this->has_focus_ = Observable<bool>(this, false);
+
+    this->style_ = style;
+    this->focused_style_ = focused_style ? focused_style : new UIStyle(this->style_->HighContrast());
+
   }
 
   Component(const Component&) = delete;
@@ -127,10 +135,10 @@ public:
   virtual std::vector<Component*> Children() { return { this }; };
 
   // Change the focused state of the component
-  Component* Focus(bool state = true);
+  virtual Component* Focus();
 
   // Changes the focused state of the component to false
-  Component* Unfocus();
+  virtual Component* Unfocus();
 
   // Modify position to move the component into the bounds of its parent
   Component* MoveIntoParentBounds();

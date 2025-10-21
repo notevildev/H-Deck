@@ -16,15 +16,15 @@ namespace SGui {
 
   // Change the focused state of the component
   // Returns self
-  Component* Component::Focus(bool state) {
-    this->focused_ = state;
+  Component* Component::Focus() {
+    this->has_focus_ = true;
     return this;
   }
 
   // Changes the focused state of the component to false
   // Returns self
   Component* Component::Unfocus() {
-    this->focused_ = false;
+    this->has_focus_ = false;
     return this;
   }
 

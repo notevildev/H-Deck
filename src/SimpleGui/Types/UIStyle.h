@@ -21,6 +21,12 @@ public:
           border_thickness_(border_thickness), text_size_(text_size), padding_(padding) {
     }
 
+    // Enable copying/moving; explicit for clarity
+    UIStyle(const UIStyle&) = default;
+    UIStyle& operator=(const UIStyle&) = default;
+    UIStyle(UIStyle&&) = default;
+    UIStyle& operator=(UIStyle&&) = default;
+
     // Returns a high contrast version of this style (NOT A POINTER)
     // inverts background and foreground
     // [used for focused components]
@@ -75,22 +81,18 @@ public:
     }
 };
 
-/* TODO:
-* Figure out how to prevent accidental overriding from other components
-*/
-static UIStyle* DEFAULT_STYLE = new UIStyle(
-    (UIColor)WHITE, // foreground
-    (UIColor)BLACK, // background
-    (UIColor)RED, // border color
-    1, // border thickness
-    1, // text size
-    UIBoxSpacing{
-        0,
-        0,
-        0,
-        0
-    } // padding
-);
+static const UIStyle DEFAULT_STYLE = {
+  (UIColor)WHITE, // foreground
+  (UIColor)BLACK, // background
+  (UIColor)RED, // border color
+  1, // border thickness
+  1, // text size
+  UIBoxSpacing{
+    0,
+    0,
+    0,
+    0
+  } // padding
+};
 
-static UIStyle* DEFAULT_STYLE_FOCUSED = new UIStyle(DEFAULT_STYLE->HighContrast());
 }

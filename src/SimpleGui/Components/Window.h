@@ -2,7 +2,7 @@
 
 #include <TFT_eSPI.h>
 
-#include "../Types/Enums.h"
+#include "../Types/enums.h"
 #include "../helper.h"
 #include "Container.h"
 
@@ -25,17 +25,19 @@ namespace SGui {
         this->size_.y = TFT_HEIGHT;
       }
 
-      if (this->style_ == nullptr) {
+      if (!this->style_) {
+#ifdef DEBUG
         Serial.println("Style is null, panicking");
+#endif
         exit(-1);
       }
-
       this->style_->padding_.top = title_padding.top + title_padding.bottom     // account for title padding
                                         + tft.fontHeight();     // account for title text
 
       if (title_ != "") {
         this->pos_.y = tft.fontHeight() + this->pos_.y + 1;
       }
+
     };
 
     // Set the title of the window

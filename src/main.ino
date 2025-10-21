@@ -3,6 +3,8 @@
 
 #include "main.h"
 
+#include "SimpleGui/HID/DPad.h"
+#include "SimpleGui/HID/builtin/TTrackball.h"
 #include "SimpleGui/SimpleGui.h"
 
 #define MAX_FRAMERATE 15
@@ -32,14 +34,16 @@ void setup() {
   digitalWrite(TFT_BACKLIGHT_P, HIGH);
 
   Serial.println("Initializing TFT...");
-  gui = Init();
+  gui = GUIManager::New();
+
   Serial.println("Enabling inputs...");
-  gui->enable_trackball_input();
+  gui->enable_dpad_navigation(new HID::TTrackball(gui->get_input_queue()));
 
   Serial.println("Creating window...");
 
   window = new Window();
-  window->SetColor((SGui::UIColor)RED);
+  window->SetColor((UIColor)RED);
+
   Serial.println("Setting title...");
   window->SetTitle("Example Window");
 
@@ -49,7 +53,8 @@ void setup() {
         (new Label("Hello, World!"))->SetTextSize(2),
         (new Button("Button 1")),
         (new Button("Button 2")),
-        (new Label("This is an example application using the SGui library!"))
+        (new Label("This is an example application using the SGui library!")),
+        (new Button("Button 3"))
       }
     );
 
@@ -57,26 +62,6 @@ void setup() {
   gui->add_window(window);
 
   Serial.println("Binding input events...");
-  gui->bind_input_event(input_event_t{.type=TRACKBALL, .id=TRACKBALL_UP},
-    [](GUIManager* self) {
-      self->get_active_window()->FocusPrev();
-  });
-
-  gui->bind_input_event(input_event_t{.type=TRACKBALL, .id=TRACKBALL_DOWN},
-    [](GUIManager* self) {
-      self->get_active_window()->FocusNext();
-  });
-
-  gui->bind_input_event(SGui::input_event_t{.type=TRACKBALL, .id=TRACKBALL_LEFT},
-    [](GUIManager* self) {
-      self->get_active_window()->FocusPrev();
-  });
-
-  gui->bind_input_event(SGui::input_event_t{.type=TRACKBALL, .id=TRACKBALL_RIGHT},
-    [](GUIManager* self) {
-      self->get_active_window()->FocusNext();
-  });
-
 }
 
 void loop() {
@@ -87,10 +72,19 @@ void loop() {
    * 4.) Render
    */
 
-  // Serial.println("Handling Inputs...");
+#ifdef DEBUG
+  Serial.println("Handling Inputs...");
+#endif
   gui->handle_inputs();
-  // Serial.println("Drawing UI...");
+
+#ifdef DEBUG
+  Serial.println("Drawing UI...");
+#endif
   gui->render();
-  // Serial.println("Looping...");
+
+#ifdef DEBUG
+  Serial.println("Looping...");
+#endif
+
   delay(frame_sleep); // Wait for the next frame (as not to overload the Display or the CPU)
 }
