@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "Utils/managed_buffer.h"
-#include "Components/Window.h"
+#include "Components/UIComponents.h"
 #include "Types/input.h"
 #include "HID/DPad.h"
 #include "HID/Keyboard.h"
@@ -19,7 +19,7 @@ namespace SGui {
     Window* active_window_ = nullptr;
     int16_t active_window_index_ = -1;
 
-    Component* focused_component_;
+    InputComponent* focused_component_;
 
     HID::DPad* dpad_;
     HID::Keyboard* keyboard_;

@@ -114,7 +114,7 @@ focus_search_status_t GUIManager::focus_next_component(UIOrientation orientation
         if (this->focused_component_) { // handle no focused component
           this->focused_component_->Unfocus();
         }
-        this->focused_component_ = child->Focus();
+        this->focused_component_ = (InputComponent*)child->Focus();
         return SUCCESS;
       }
 
@@ -133,11 +133,13 @@ focus_search_status_t GUIManager::focus_next_component(UIOrientation orientation
     return OUT_OF_BOUNDS;
 
   this->focused_component_->Unfocus();
+  this->focused_component_ = nullptr;
+
 
   if (!firstFocusable)
     return NO_CHILDREN;
 
-  this->focused_component_ = firstFocusable->Focus();
+  this->focused_component_ = (InputComponent*)firstFocusable->Focus();
   return SUCCESS;
 }
 
@@ -174,7 +176,7 @@ focus_search_status_t GUIManager::focus_prev_component(UIOrientation orientation
         if (this->focused_component_) { // handle no focused component
           this->focused_component_->Unfocus();
         }
-        this->focused_component_ = child->Focus();
+        this->focused_component_ = (InputComponent*)child->Focus();
         return SUCCESS;
       }
 
@@ -192,11 +194,12 @@ focus_search_status_t GUIManager::focus_prev_component(UIOrientation orientation
     return OUT_OF_BOUNDS;
 
   this->focused_component_->Unfocus();
+  this->focused_component_ = nullptr;
 
   if (!firstFocusable)
     return NO_CHILDREN;
 
-  this->focused_component_ = firstFocusable->Focus();
+  this->focused_component_ = (InputComponent*)firstFocusable->Focus();
   return SUCCESS;
 }
 
@@ -216,12 +219,17 @@ handler_status_t GUIManager::handle(input_event_t input) {
 #endif
     return NO_HANDLER;
   }
-    try {
-      i->second(self_);  // <- this is so fucking cursed lmfao
-      return COMPLETE;
-    } catch (...) {
-      return BAD_HANDLER;
-    }
+  bool handled = false;
+
+  if (self_->focused_component_) { // attempt to handle the input event at the component level first
+    handled = self_->focused_component_->handle_input_event(input, self_);
+  }
+
+  if (!handled) {
+    i->second(self_);  // handle the input event at the Manager level
+  }
+  return COMPLETE;
+
 }
 
 // Handles ALL inputs currently queued in the input_queue
